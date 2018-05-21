@@ -5,8 +5,8 @@
 //              calculator exists on the EPA web site.
 // Copyright:   N/A
 // Authors:     L. Rossman, US EPA
-// Version:     1.1.0.0
-// Last Update: 10/14/13
+// Version:     1.1.0.1
+// Last Update: 11/6/14
 //
 // ----------------------------------------------------------------------------
 
@@ -23,10 +23,17 @@ namespace StormwaterCalculator
 {
     static class VersionChecker
     {
-        static string webSite = @"http://www.epa.gov/nrmrl/wswrd/wq/models/swc/";
+        // Most current SWC production web site
+        static string webSite = @"http://www.epa.gov/water-research/national-stormwater-calculator";
+
+        // URL to version check file
+        static string versionPath = @"http://www.epa.gov/water-research/national-stormwater-calculator/swc-version.txt";
+
         // This is for the NRMRL staging server
         //static string webSite = @"http://epastage.epa.gov/nrmrldev/swc/";
-        static string versionPath = webSite + "version.txt";
+        
+        // URL of file containing the most current version number
+        //static string versionPath = @"http://www2.epa.gov/sites/production/files/2014-10/swc-version.txt";
 
         internal static bool NewVersion()
         {
@@ -43,7 +50,8 @@ namespace StormwaterCalculator
 
             // A newer version exists so direct user to SWC web page
             string message =
-                "A new release of the Stormwater Calculator is now available. " +
+                "A new release (version " + newVersion +
+                ") of the Stormwater Calculator is now available. " +
                 "Would you like to install it?";
             string caption = "Stormwater Calculator Update";
             MessageBoxButtons buttons = MessageBoxButtons.YesNo;
@@ -63,10 +71,12 @@ namespace StormwaterCalculator
             try
             {
                 WebClient client = new System.Net.WebClient();
+                // TODO: Need to add http request header here too
+
                 Byte[] data = client.DownloadData(versionPath);
                 newVersion = Encoding.ASCII.GetString(data);
             }
-            catch //(Exception webEx)
+            catch //(Exception webEx) Fails silently
             {
                 //MessageBox.Show("Web Exception: " + webEx.ToString());
                 return curVersion;

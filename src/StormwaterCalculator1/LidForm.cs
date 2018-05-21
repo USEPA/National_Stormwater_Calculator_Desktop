@@ -4,8 +4,8 @@
 // Description: Code module for form that sets design parameters for LID controls.
 // Copyright:   N/A
 // Authors:     L. Rossman, US EPA
-// Version:     1.00.00
-// Last Update: 4/19/13
+// Version:     1.1.0.1
+// Last Update: 11/6/14
 // ----------------------------------------------------------------------------
 
 using System;
@@ -335,7 +335,8 @@ namespace StormwaterCalculator
 
         private void lnkLblInfilBasin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.cabmphandbooks.com/Documents/Development/TC-11.pdf");
+            System.Diagnostics.Process.Start(
+                "https://www.escondido.org/Data/Sites/1/media/pdfs/Utilities/BMPInfiltrationBasin.pdf"); //1.1.0.1
         }
 
         private void lnkLblPlanter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -365,7 +366,7 @@ namespace StormwaterCalculator
         private void lnkLblGreenRoof_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/SWC/NonPBMPSpecsMarch11/VASWMBMPSpec5VEGETATEDROOF.html");
+                "http://www.vwrrc.vt.edu/swc/documents/2013/DEQ%20BMP%20Spec%20No%205_VEGETATED%20ROOF_Final%20Draft_v2-3_03012011.pdf"); //1.1.0.1
         }
     }
 }

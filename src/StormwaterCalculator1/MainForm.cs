@@ -5,8 +5,8 @@
 //              form of the Stormwater Calculator.
 // Copyright:   N/A
 // Authors:     L. Rossman, US EPA
-// Version:     1.1.0.1
-// Last Update: 06/24/14
+// Version:     1.1.0.2
+// Last Update: 02/03/2016
 //
 // This form implements a tabbed page application.
 //
@@ -64,7 +64,7 @@ namespace StormwaterCalculator
         public static extern int swmm_run(string f1, string f2, string f3);
 
         // Release Number
-        public string releaseVersion = "Release 1.1.0.1";
+        public string releaseVersion = "Release 1.1.0.2";
 
         // Actions carried out by a background worker thread
         public enum Actions { GET_SOIL_DATA, GET_RAINFALL, RUN_SWMM, CALC_STATS };
