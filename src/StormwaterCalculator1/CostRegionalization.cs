@@ -350,7 +350,7 @@ namespace StormwaterCalculator
                     catalog = false,
                     calculations = false,
                     annualaverage = true,
-                    registrationKey = "cecffbde84de416dbe4d198437f7c03e"
+                    registrationKey = "408c86477d784c4abf2b179a79d5e79f"
 
                 });
 
