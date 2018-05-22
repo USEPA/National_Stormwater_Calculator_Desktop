@@ -105,7 +105,7 @@ namespace StormwaterCalculator
 
 
 
-            string URL = "http://sdmdataaccess.nrcs.usda.gov/Spatial/SDMNAD83Geographic.wfs?Service=WFS&Version=1.0.0&Request=GetFeature&Typename=MapunitPoly&Filter="
+            string URL = "https://sdmdataaccess.nrcs.usda.gov/Spatial/SDMNAD83Geographic.wfs?Service=WFS&Version=1.0.0&Request=GetFeature&Typename=MapunitPoly&Filter="
                          + Filter;
             string ResultXml;
 
@@ -311,7 +311,7 @@ namespace StormwaterCalculator
             // database. See http://msdn.microsoft.com/en-us/library/bb628652.aspx for
             // instructions on how to create a Service Referenc. The URL of NRCS's 
             // SSURGO web service required by the Service Reference is:
-            //"http://sdmdataaccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx".
+            //"https://sdmdataaccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx".
 
             ServiceReference1.SDMTabularServiceSoapClient Soap = new ServiceReference1.SDMTabularServiceSoapClient();
             System.Data.DataSet SystemDataSet = Soap.RunQuery(Query);

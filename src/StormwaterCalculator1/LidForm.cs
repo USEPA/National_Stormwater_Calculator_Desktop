@@ -4,7 +4,7 @@
 // Description: Code module for form that sets design parameters for LID controls.
 // Copyright:   N/A
 // Authors:     L. Rossman, US EPA
-// Version:     1.1.0.1
+// Version:     1.1.0.3
 // Last Update: 11/6/14
 // ----------------------------------------------------------------------------
 
@@ -24,10 +24,17 @@ namespace StormwaterCalculator
         public int activePageIndex;
         public decimal designStormDepth;
         public bool hasChanged;
- 
+        CostHelp CostHelpForm;                 //additions for cost module to use Cost Help pop window
+
         public LidForm()
         {
             InitializeComponent();
+        }
+
+        //additions for cost module
+        private void LidForm_Load(object sender, EventArgs e)
+        {
+            CostHelpForm = new CostHelp();
         }
 
         private void LidForm_Activated(object sender, EventArgs e)
@@ -162,6 +169,7 @@ namespace StormwaterCalculator
             nudRGSoilHeight.Value = Properties.LidSettings.Default.rgSoilHeight;
             nudRGSoilKsat.Value = Properties.LidSettings.Default.rgSoilKsat;
             nudRGCapture.Value = Properties.LidSettings.Default.rgCapture;
+            cbCostRGPreTreat.Checked = Properties.LidSettings.Default.rgHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void LoadDefaultGRData()
@@ -175,6 +183,7 @@ namespace StormwaterCalculator
             nudPPPavementHeight.Value = Properties.LidSettings.Default.ppPaveHeight;
             nudPPGravelHeight.Value = Properties.LidSettings.Default.ppDrainHeight;
             nudPPCapture.Value = Properties.LidSettings.Default.ppCapture;
+            cbCostPPPreTreat.Checked = Properties.LidSettings.Default.ppHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void LoadDefaultRHData()
@@ -197,6 +206,7 @@ namespace StormwaterCalculator
         {
             nudIBHeight.Value = Properties.LidSettings.Default.ibHeight;
             nudIBCapture.Value = Properties.LidSettings.Default.ibCapture;
+            cbCostIBPreTreat.Checked = Properties.LidSettings.Default.ibHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void LoadData()
@@ -224,6 +234,7 @@ namespace StormwaterCalculator
             nudRGSoilHeight.Value = LidData.rgSoilHeight;
             nudRGSoilKsat.Value = LidData.rgSoilKsat;
             nudRGCapture.Value = LidData.rgCapture;
+            cbCostRGPreTreat.Checked = LidData.rgHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void LoadGRData()
@@ -237,6 +248,7 @@ namespace StormwaterCalculator
             nudPPPavementHeight.Value = LidData.ppPaveHeight;
             nudPPGravelHeight.Value = LidData.ppDrainHeight;
             nudPPCapture.Value = LidData.ppCapture;
+            cbCostPPPreTreat.Checked = LidData.ppHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void LoadRHData()
@@ -259,6 +271,7 @@ namespace StormwaterCalculator
         {
             nudIBHeight.Value = LidData.ibHeight;
             nudIBCapture.Value = LidData.ibCapture;
+            cbCostIBPreTreat.Checked = LidData.ibHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void UnloadData()
@@ -286,6 +299,7 @@ namespace StormwaterCalculator
             LidData.rgSoilHeight = nudRGSoilHeight.Value;
             LidData.rgSoilKsat = nudRGSoilKsat.Value;
             LidData.rgCapture = nudRGCapture.Value;
+            LidData.rgHasPreTreat = cbCostRGPreTreat.Checked; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void UnloadGRData()
@@ -299,6 +313,7 @@ namespace StormwaterCalculator
             LidData.ppPaveHeight = nudPPPavementHeight.Value;
             LidData.ppDrainHeight = nudPPGravelHeight.Value;
             LidData.ppCapture = nudPPCapture.Value;
+            LidData.ppHasPreTreat = cbCostPPPreTreat.Checked; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         private void UnloadRHData()
@@ -321,6 +336,7 @@ namespace StormwaterCalculator
         {
              LidData.ibHeight = nudIBHeight.Value;
              LidData.ibCapture = nudIBCapture.Value;
+             LidData.ibHasPreTreat = cbCostIBPreTreat.Checked; //cost module addition to indicate presence / abscence of pretreatment
         }
 
         // The OnLinkClicked handlers below display a specified web page in the 
@@ -368,5 +384,13 @@ namespace StormwaterCalculator
             System.Diagnostics.Process.Start(
                 "http://www.vwrrc.vt.edu/swc/documents/2013/DEQ%20BMP%20Spec%20No%205_VEGETATED%20ROOF_Final%20Draft_v2-3_03012011.pdf"); //1.1.0.1
         }
+
+        private void lblCostHasPreTreat_Click(object sender, EventArgs e)
+        {
+            Label itemLabel = (Label)sender;
+            CostHelpForm.activePageIndex = Int32.Parse((String)itemLabel.Tag);
+            CostHelpForm.ShowDialog();
+        }
+
     }
-}
+    }

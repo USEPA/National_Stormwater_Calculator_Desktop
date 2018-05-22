@@ -96,6 +96,7 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.zgcExtremePeak = new ZedGraph.ZedGraphControl();
             this.zgcExtremeEvent = new ZedGraph.ZedGraphControl();
+            this.tpCost = new System.Windows.Forms.TabPage();
             this.resultsHelpLabel = new System.Windows.Forms.LinkLabel();
             this.tcMainLeft = new System.Windows.Forms.TabControl();
             this.tpIntro = new System.Windows.Forms.TabPage();
@@ -193,6 +194,24 @@
             this.nudForest = new System.Windows.Forms.NumericUpDown();
             this.label22 = new System.Windows.Forms.Label();
             this.tpLidsLeft = new System.Windows.Forms.TabPage();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.llSiteSuitExcellent = new System.Windows.Forms.LinkLabel();
+            this.llSiteSuitModerate = new System.Windows.Forms.LinkLabel();
+            this.llSiteSuitPoor = new System.Windows.Forms.LinkLabel();
+            this.rbCostSiteExcellent = new System.Windows.Forms.RadioButton();
+            this.rbCostSitePoor = new System.Windows.Forms.RadioButton();
+            this.rbCostSiteModerate = new System.Windows.Forms.RadioButton();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.llNewDev = new System.Windows.Forms.LinkLabel();
+            this.llRedev = new System.Windows.Forms.LinkLabel();
+            this.rbCostRedev = new System.Windows.Forms.RadioButton();
+            this.rbCostNewDev = new System.Windows.Forms.RadioButton();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.tbRegMultiplier = new System.Windows.Forms.TextBox();
+            this.llCostRegion = new System.Windows.Forms.LinkLabel();
+            this.cmbCostRegion = new System.Windows.Forms.ComboBox();
+            this.label23 = new System.Windows.Forms.Label();
             this.lidHelpLabel = new System.Windows.Forms.LinkLabel();
             this.lidControlsPanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
@@ -219,6 +238,7 @@
             this.resultsLinkLabel = new System.Windows.Forms.LinkLabel();
             this.resultsPanel = new System.Windows.Forms.Panel();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.rbCostCapSmry = new System.Windows.Forms.RadioButton();
             this.rbRainRunoffEvents = new System.Windows.Forms.RadioButton();
             this.rbXeventRainRunoff = new System.Windows.Forms.RadioButton();
             this.rbRunoffRainPcnt = new System.Windows.Forms.RadioButton();
@@ -279,6 +299,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudMeadow)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudForest)).BeginInit();
             this.tpLidsLeft.SuspendLayout();
+            this.groupBox5.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.lidControlsPanel.SuspendLayout();
             this.tlpLidUsage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudImpDiscon)).BeginInit();
@@ -602,6 +625,7 @@
             this.tcResults.Controls.Add(this.tpRetentionFreqPlot);
             this.tcResults.Controls.Add(this.tpRunoffBySizePlot);
             this.tcResults.Controls.Add(this.tpRainRunoffPlot);
+            this.tcResults.Controls.Add(this.tpCost);
             this.tcResults.Name = "tcResults";
             this.tcResults.SelectedIndex = 0;
             this.tcResults.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
@@ -880,6 +904,12 @@
             this.zgcExtremeEvent.ScrollMinX = 0D;
             this.zgcExtremeEvent.ScrollMinY = 0D;
             this.zgcExtremeEvent.ScrollMinY2 = 0D;
+            // 
+            // tpCost
+            // 
+            resources.ApplyResources(this.tpCost, "tpCost");
+            this.tpCost.Name = "tpCost";
+            this.tpCost.UseVisualStyleBackColor = true;
             // 
             // resultsHelpLabel
             // 
@@ -1629,10 +1659,162 @@
             // 
             this.tpLidsLeft.BackColor = System.Drawing.Color.AliceBlue;
             this.tpLidsLeft.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tpLidsLeft.Controls.Add(this.groupBox5);
+            this.tpLidsLeft.Controls.Add(this.groupBox4);
+            this.tpLidsLeft.Controls.Add(this.groupBox6);
+            this.tpLidsLeft.Controls.Add(this.label23);
             this.tpLidsLeft.Controls.Add(this.lidHelpLabel);
             this.tpLidsLeft.Controls.Add(this.lidControlsPanel);
             resources.ApplyResources(this.tpLidsLeft, "tpLidsLeft");
             this.tpLidsLeft.Name = "tpLidsLeft";
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.llSiteSuitExcellent);
+            this.groupBox5.Controls.Add(this.llSiteSuitModerate);
+            this.groupBox5.Controls.Add(this.llSiteSuitPoor);
+            this.groupBox5.Controls.Add(this.rbCostSiteExcellent);
+            this.groupBox5.Controls.Add(this.rbCostSitePoor);
+            this.groupBox5.Controls.Add(this.rbCostSiteModerate);
+            resources.ApplyResources(this.groupBox5, "groupBox5");
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.TabStop = false;
+            // 
+            // llSiteSuitExcellent
+            // 
+            resources.ApplyResources(this.llSiteSuitExcellent, "llSiteSuitExcellent");
+            this.llSiteSuitExcellent.Name = "llSiteSuitExcellent";
+            this.llSiteSuitExcellent.TabStop = true;
+            this.llSiteSuitExcellent.Tag = "4";
+            this.llSiteSuitExcellent.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // llSiteSuitModerate
+            // 
+            resources.ApplyResources(this.llSiteSuitModerate, "llSiteSuitModerate");
+            this.llSiteSuitModerate.Name = "llSiteSuitModerate";
+            this.llSiteSuitModerate.TabStop = true;
+            this.llSiteSuitModerate.Tag = "3";
+            this.llSiteSuitModerate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // llSiteSuitPoor
+            // 
+            resources.ApplyResources(this.llSiteSuitPoor, "llSiteSuitPoor");
+            this.llSiteSuitPoor.Name = "llSiteSuitPoor";
+            this.llSiteSuitPoor.TabStop = true;
+            this.llSiteSuitPoor.Tag = "2";
+            this.llSiteSuitPoor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // rbCostSiteExcellent
+            // 
+            resources.ApplyResources(this.rbCostSiteExcellent, "rbCostSiteExcellent");
+            this.rbCostSiteExcellent.ForeColor = System.Drawing.Color.Black;
+            this.rbCostSiteExcellent.Name = "rbCostSiteExcellent";
+            this.rbCostSiteExcellent.Tag = "0";
+            this.rbCostSiteExcellent.UseVisualStyleBackColor = true;
+            // 
+            // rbCostSitePoor
+            // 
+            resources.ApplyResources(this.rbCostSitePoor, "rbCostSitePoor");
+            this.rbCostSitePoor.Checked = true;
+            this.rbCostSitePoor.ForeColor = System.Drawing.Color.Black;
+            this.rbCostSitePoor.Name = "rbCostSitePoor";
+            this.rbCostSitePoor.TabStop = true;
+            this.rbCostSitePoor.Tag = "0";
+            this.rbCostSitePoor.UseVisualStyleBackColor = true;
+            // 
+            // rbCostSiteModerate
+            // 
+            resources.ApplyResources(this.rbCostSiteModerate, "rbCostSiteModerate");
+            this.rbCostSiteModerate.ForeColor = System.Drawing.Color.Black;
+            this.rbCostSiteModerate.Name = "rbCostSiteModerate";
+            this.rbCostSiteModerate.Tag = "0";
+            this.rbCostSiteModerate.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.llNewDev);
+            this.groupBox4.Controls.Add(this.llRedev);
+            this.groupBox4.Controls.Add(this.rbCostRedev);
+            this.groupBox4.Controls.Add(this.rbCostNewDev);
+            resources.ApplyResources(this.groupBox4, "groupBox4");
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.TabStop = false;
+            // 
+            // llNewDev
+            // 
+            resources.ApplyResources(this.llNewDev, "llNewDev");
+            this.llNewDev.Name = "llNewDev";
+            this.llNewDev.TabStop = true;
+            this.llNewDev.Tag = "1";
+            this.llNewDev.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // llRedev
+            // 
+            resources.ApplyResources(this.llRedev, "llRedev");
+            this.llRedev.Name = "llRedev";
+            this.llRedev.TabStop = true;
+            this.llRedev.Tag = "0";
+            this.llRedev.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // rbCostRedev
+            // 
+            resources.ApplyResources(this.rbCostRedev, "rbCostRedev");
+            this.rbCostRedev.Checked = true;
+            this.rbCostRedev.ForeColor = System.Drawing.Color.Black;
+            this.rbCostRedev.Name = "rbCostRedev";
+            this.rbCostRedev.TabStop = true;
+            this.rbCostRedev.Tag = "0";
+            this.rbCostRedev.UseVisualStyleBackColor = true;
+            // 
+            // rbCostNewDev
+            // 
+            resources.ApplyResources(this.rbCostNewDev, "rbCostNewDev");
+            this.rbCostNewDev.ForeColor = System.Drawing.Color.Black;
+            this.rbCostNewDev.Name = "rbCostNewDev";
+            this.rbCostNewDev.Tag = "0";
+            this.rbCostNewDev.UseVisualStyleBackColor = true;
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.label24);
+            this.groupBox6.Controls.Add(this.tbRegMultiplier);
+            this.groupBox6.Controls.Add(this.llCostRegion);
+            this.groupBox6.Controls.Add(this.cmbCostRegion);
+            resources.ApplyResources(this.groupBox6, "groupBox6");
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.TabStop = false;
+            // 
+            // label24
+            // 
+            resources.ApplyResources(this.label24, "label24");
+            this.label24.Name = "label24";
+            // 
+            // tbRegMultiplier
+            // 
+            resources.ApplyResources(this.tbRegMultiplier, "tbRegMultiplier");
+            this.tbRegMultiplier.Name = "tbRegMultiplier";
+            // 
+            // llCostRegion
+            // 
+            resources.ApplyResources(this.llCostRegion, "llCostRegion");
+            this.llCostRegion.Name = "llCostRegion";
+            this.llCostRegion.TabStop = true;
+            this.llCostRegion.Tag = "5";
+            this.llCostRegion.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCostModuleHelp_LinkClicked);
+            // 
+            // cmbCostRegion
+            // 
+            this.cmbCostRegion.FormattingEnabled = true;
+            this.cmbCostRegion.Items.AddRange(new object[] {
+            resources.GetString("cmbCostRegion.Items")});
+            resources.ApplyResources(this.cmbCostRegion, "cmbCostRegion");
+            this.cmbCostRegion.Name = "cmbCostRegion";
+            this.cmbCostRegion.SelectedIndexChanged += new System.EventHandler(this.cmbCostRegion_SelectedIndexChanged);
+            // 
+            // label23
+            // 
+            resources.ApplyResources(this.label23, "label23");
+            this.label23.Name = "label23";
             // 
             // lidHelpLabel
             // 
@@ -1838,6 +2020,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.rbCostCapSmry);
             this.groupBox3.Controls.Add(this.rbRainRunoffEvents);
             this.groupBox3.Controls.Add(this.rbXeventRainRunoff);
             this.groupBox3.Controls.Add(this.rbRunoffRainPcnt);
@@ -1848,6 +2031,14 @@
             resources.ApplyResources(this.groupBox3, "groupBox3");
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.TabStop = false;
+            // 
+            // rbCostCapSmry
+            // 
+            resources.ApplyResources(this.rbCostCapSmry, "rbCostCapSmry");
+            this.rbCostCapSmry.Name = "rbCostCapSmry";
+            this.rbCostCapSmry.TabStop = true;
+            this.rbCostCapSmry.UseVisualStyleBackColor = true;
+            this.rbCostCapSmry.Click += new System.EventHandler(this.ResultsBtn_Clicked);
             // 
             // rbRainRunoffEvents
             // 
@@ -2089,6 +2280,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudForest)).EndInit();
             this.tpLidsLeft.ResumeLayout(false);
             this.tpLidsLeft.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             this.lidControlsPanel.ResumeLayout(false);
             this.tlpLidUsage.ResumeLayout(false);
             this.tlpLidUsage.PerformLayout();
@@ -2324,7 +2521,26 @@
         private System.Windows.Forms.RadioButton rbRainRunoffEvents;
         private System.Windows.Forms.TabPage tpEventPlot;
         private ZedGraph.ZedGraphControl zgcRainRunoff;
-
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.LinkLabel llSiteSuitExcellent;
+        private System.Windows.Forms.LinkLabel llSiteSuitModerate;
+        private System.Windows.Forms.LinkLabel llSiteSuitPoor;
+        private System.Windows.Forms.RadioButton rbCostSiteExcellent;
+        private System.Windows.Forms.RadioButton rbCostSitePoor;
+        private System.Windows.Forms.RadioButton rbCostSiteModerate;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.LinkLabel llNewDev;
+        private System.Windows.Forms.LinkLabel llRedev;
+        private System.Windows.Forms.RadioButton rbCostRedev;
+        private System.Windows.Forms.RadioButton rbCostNewDev;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.TextBox tbRegMultiplier;
+        private System.Windows.Forms.LinkLabel llCostRegion;
+        private System.Windows.Forms.ComboBox cmbCostRegion;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.RadioButton rbCostCapSmry;
+        private System.Windows.Forms.TabPage tpCost;
     }
 }
 

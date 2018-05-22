@@ -49,7 +49,7 @@ namespace StormwaterCalculator
             myDoc = new pdfDocument("Stormwater Calculator Report", "swc");
             int strWidth = myDoc.getFontReference(strFont).getWordWidth("Page x Of x", 10);
             int left = 612 - rightMargin - strWidth;
-            myDoc.pageMarker = new pdfPageMarker(left, bottomMargin-lineHeight, predefinedMarkerStyle.csArabic, 
+            myDoc.pageMarker = new pdfPageMarker(left, bottomMargin - lineHeight, predefinedMarkerStyle.csArabic,
                 myDoc.getFontReference(strFont), 10);
             footer = footer + releaseVersion;
         }
@@ -100,7 +100,7 @@ namespace StormwaterCalculator
         {
             myPage.drawLine(leftMargin, bottomMargin, myPage.width - rightMargin,
                 bottomMargin, predefinedLineStyle.csNormal, pdfColor.Black, 1);
-            myPage.addText(footer, leftMargin, bottomMargin-lineHeight,
+            myPage.addText(footer, leftMargin, bottomMargin - lineHeight,
                 myDoc.getFontReference(strFont), 10);
         }
 
@@ -248,6 +248,198 @@ namespace StormwaterCalculator
                 myPage.addImage(myDoc.getImageReference(imageName2), xPos, yPos, plotHeight, plotWidth);
                 myPage.drawLine(xPos, yPos, xPos + plotWidth, yPos, predefinedLineStyle.csNormal, pdfColor.Black, 1);
             }
+            WriteFooter(myPage);
+        }
+        
+        //writes capital cost estimates summary to the pdf report
+        protected void WriteCapitalCostSummaryTable(pdfPage myPage, string tableTitle,int tblStartLine, dynamic costModuleResults)
+        {
+            int line = tblStartLine;
+            myPage.addText(tableTitle, GetCenteredOffset(myPage, tableTitle, 20),
+               GetLineTop(myPage, line), myDoc.getFontReference(strFont), 16, pdfColor.Black);
+            line = line + 1;
+
+            pdfTable myTable = new pdfTable(myDoc, 1, pdfColor.Black, 5,
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, new pdfColor("d9d1b3")),
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, pdfColor.White),
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, pdfColor.White));
+            myTable.coordX = leftMargin;
+            myTable.coordY = GetLineTop(myPage, line);
+            myTable.tableHeader.rowHeight = 25;
+            myTable.tableHeader.addColumn(120, predefinedAlignment.csLeft);
+            myTable.tableHeader[0].addText("LID Control");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[1].addText("Current Scenario");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[2].addText("Baseline Scenario");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[3].addText("Cost Difference");
+
+            int tableRowHt = 15;
+            string tempCostLow;
+            string tempCostHigh;
+            string tempCostDiffLow;
+            string tempCostDiffHigh;
+            pdfTableRow myRow;
+            //foreach (dynamic o in costModuleResults)
+            for (int i = 0; i < costModuleResults.Count - 1; i++)
+            {
+                dynamic o = costModuleResults[i];
+                myRow = myTable.createRow();
+                myRow.rowHeight = tableRowHt;
+
+                myRow[0].addText(Convert.ToString(o.name));//lid control name
+
+                if (o.currentScenarioCapCostLow != null)
+                {
+                    tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)o.currentScenarioCapCostLow / 100.0, 0) * 100);
+                    tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)o.currentScenarioCapCostHigh / 100.0, 0) * 100);
+                    myRow[1].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//current capital cost low
+                }
+
+
+                if (o.baseScenarioCapCostLow != null)
+                {
+                    tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)o.baseScenarioCapCostLow / 100.0, 0) * 100);
+                    tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)o.baseScenarioCapCostHigh / 100.0, 0) * 100);
+                    myRow[2].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//base capital cost high
+
+                    //populate cost difference column
+                    tempCostDiffLow = String.Format("{0:#,###,###.##}", Math.Round(((Double)o.currentScenarioCapCostLow - (Double)o.baseScenarioCapCostLow) / 100.0, 0) * 100);
+                    tempCostDiffHigh = String.Format("{0:#,###,###.##}", Math.Round(((Double)o.currentScenarioCapCostHigh - (Double)o.baseScenarioCapCostHigh) / 100.0, 0) * 100);
+                    myRow[3].addText("$ " + tempCostDiffLow + " - " + "$ " + tempCostDiffHigh);//cost difference
+                }
+
+                myTable.addRow(myRow);
+            }
+
+            //last row is totals
+            myRow = myTable.createRow();
+            myRow.rowHeight = tableRowHt;
+            dynamic oTotal = costModuleResults[costModuleResults.Count-1];
+            myRow[0].addText("Total");
+
+            //current capital cost low and high total
+            tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.currentScenarioCapCostLowSum / 100.0, 0) * 100);
+            tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.currentScenarioCapCostHighSum / 100.0, 0) * 100);
+            myRow[1].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//current capital cost low
+
+            //base capital cost difference total
+            if (costModuleResults[costModuleResults.Count - 2].baseScenarioCapCostLow != null)
+            {
+                tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.baseScenarioCapCostLowSum / 100.0, 0) * 100);
+                tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.baseScenarioCapCostHighSum / 100.0, 0) * 100);
+                myRow[2].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//base capital cost high
+
+                //populate cost difference column
+                tempCostDiffLow = String.Format("{0:#,###,###.##}", Math.Round(((Double)oTotal.currentScenarioCapCostLowSum - (Double)oTotal.baseScenarioCapCostLowSum) / 100.0, 0) * 100);
+                tempCostDiffHigh = String.Format("{0:#,###,###.##}", Math.Round(((Double)oTotal.currentScenarioCapCostHighSum - (Double)oTotal.baseScenarioCapCostHighSum) / 100.0, 0) * 100);
+                myRow[3].addText("$ " + tempCostDiffLow + " - " + "$ " + tempCostDiffHigh);//cost difference
+            }
+            myTable.addRow(myRow);
+
+            myPage.addTable(myTable);
+
+        }
+
+        //writes maintenance cost estimates summary to the pdf report
+        protected void WriteMaintCostSummaryTable(pdfPage myPage, string tableTitle, int tblStartLine, dynamic costModuleResults)
+        {
+            int line = tblStartLine;
+            myPage.addText(tableTitle, GetCenteredOffset(myPage, tableTitle, 20),
+               GetLineTop(myPage, line), myDoc.getFontReference(strFont), 16, pdfColor.Black);
+            line = line + 1;
+            //myPage.addText(tableTitle, leftMargin, bottomMargin + lineHeight, myDoc.getFontReference(strFont), 10);
+            pdfTable myTable = new pdfTable(myDoc, 1, pdfColor.Black, 5,
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, new pdfColor("d9d1b3")),
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, pdfColor.White),
+                new pdfTableStyle(myDoc.getFontReference(strFont), 10, pdfColor.Black, pdfColor.White));
+            myTable.coordX = leftMargin;
+            myTable.coordY = GetLineTop(myPage, line);
+            myTable.tableHeader.rowHeight = 25;
+            myTable.tableHeader.addColumn(120, predefinedAlignment.csLeft);
+            myTable.tableHeader[0].addText("LID Control");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[1].addText("Current Scenario");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[2].addText("Baseline Scenario");
+            myTable.tableHeader.addColumn(130, predefinedAlignment.csLeft);
+            myTable.tableHeader[3].addText("Cost Difference");
+
+
+            int tableRowHt = 15;
+            string tempCostLow;
+            string tempCostHigh;
+            string tempCostDiffLow;
+            string tempCostDiffHigh;
+            pdfTableRow myRow;
+            //foreach (dynamic o in costModuleResults)
+            for (int i = 0; i < costModuleResults.Count-1; i++) 
+            {
+                dynamic o = costModuleResults[i];
+                myRow = myTable.createRow();
+                myRow.rowHeight = tableRowHt;
+
+
+                myRow[0].addText(Convert.ToString(o.name));//lid control name
+
+                if (o.currentScenarioMaintCostLow != null)
+                {
+                    tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)o.currentScenarioMaintCostLow / 100.0, 0) * 100);
+                    tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)o.currentScenarioMaintCostHigh / 100.0, 0) * 100);
+                    myRow[1].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//current maint cost low
+                }
+
+                if (o.baseScenarioMaintCostLow != null)
+                {
+                    tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)o.baseScenarioMaintCostLow / 100.0, 0) * 100);
+                    tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)o.baseScenarioMaintCostHigh / 100.0, 0) * 100);
+                    myRow[2].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//base maint cost high
+
+                    //populate cost difference column
+                    tempCostDiffLow = String.Format("{0:#,###,###.##}", Math.Round(((Double)o.currentScenarioMaintCostLow - (Double)o.baseScenarioMaintCostLow) / 100.0, 0) * 100);
+                    tempCostDiffHigh = String.Format("{0:#,###,###.##}", Math.Round(((Double)o.currentScenarioMaintCostHigh - (Double)o.baseScenarioMaintCostHigh) / 100.0, 0) * 100);
+                    myRow[3].addText("$ " + tempCostDiffLow + " - " + "$ " + tempCostDiffHigh);//cost difference
+                }  
+                myTable.addRow(myRow);
+            }
+
+            //last row is totals
+            myRow = myTable.createRow();
+            myRow.rowHeight = tableRowHt;
+            dynamic oTotal = costModuleResults[costModuleResults.Count - 1];
+            myRow[0].addText("Total");
+
+            //current maintenance cost low and high total
+            tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.currentScenarioMaintCostLowSum / 100.0, 0) * 100);
+            tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.currentScenarioMaintCostHighSum / 100.0, 0) * 100);
+            myRow[1].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//current maintenance cost low
+
+            //base maintenance cost difference total
+            if (costModuleResults[costModuleResults.Count - 2].baseScenarioCapCostLow != null)
+            {
+                tempCostLow = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.baseScenarioMaintCostLowSum / 100.0, 0) * 100);
+                tempCostHigh = String.Format("{0:#,###,###.##}", Math.Round((Double)oTotal.baseScenarioMaintCostHighSum / 100.0, 0) * 100);
+                myRow[2].addText("$ " + tempCostLow + " - " + "$ " + tempCostHigh);//base maintenance cost high
+
+                //populate cost difference column
+                tempCostDiffLow = String.Format("{0:#,###,###.##}", Math.Round(((Double)oTotal.currentScenarioMaintCostLowSum - (Double)oTotal.baseScenarioMaintCostLowSum) / 100.0, 0) * 100);
+                tempCostDiffHigh = String.Format("{0:#,###,###.##}", Math.Round(((Double)oTotal.currentScenarioMaintCostHighSum - (Double)oTotal.baseScenarioMaintCostHighSum) / 100.0, 0) * 100);
+                myRow[3].addText("$ " + tempCostDiffLow + " - " + "$ " + tempCostDiffHigh);//cost difference
+            }
+            myTable.addRow(myRow);
+
+            myPage.addTable(myTable);
+        }
+
+        //writes capital and maintenance cost estimates summary to the pdf report
+        public void WriteCostSummaryPage(string siteName, dynamic costModuleResults)
+        {
+            pdfPage myPage = myDoc.addPage(predefinedPageSize.csSharpPDFFormat);
+            int width = myPage.width - leftMargin - rightMargin;
+            WritePageTitle(myPage, "Estimate of Probable Costs", siteName);
+            WriteCapitalCostSummaryTable(myPage, "Capital Costs", 4, costModuleResults);
+            WriteMaintCostSummaryTable(myPage, "Maintenance Costs", 17, costModuleResults);
             WriteFooter(myPage);
         }
 

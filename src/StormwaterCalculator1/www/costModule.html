@@ -1,0 +1,275 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9" />
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8">
+    <title></title>
+    <link href="css/ionic.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<!--<body ng-app="nscwebappApp">-->
+<body onload="initialize();">
+    <br>
+    <div class="container">
+        <div ng-view=""></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js"></script>
+    <script src="js/lib/plotly.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.8/angular-route.min.js"></script>
+    <script type="text/ng-template" id="main.html">
+        <ion-content padding="true" direction="xy" overflowscroll="true">
+            <div id="mainPage">
+                <h4 class="text-center">{{main.pageTitle}} {{main.pageSubTitle}}</h4>
+                <div class="row">
+                    <div class="col col-10"></div>
+                    <div class="col text-center">
+                        <a href="" ng-show="main.showCap" ng-click="main.toggleCapMaintViews(false)">Maintenance Costs |</a>
+                        <a href="" ng-show="main.showMaint" ng-click="main.toggleCapMaintViews(true)">Capital Costs|</a>
+                        <a href="" ng-show="main.showTabular" ng-click="main.toggleGraphicalView(false)">Graphical View </a>
+                        <a href="" ng-show="main.showGraphical" ng-click="main.toggleGraphicalView(true)">Tabular View </a>
+                    </div>
+                    <div class="col col-10"></div>
+                </div>
+
+                <!-- Tabular capital costs -->
+                <div ng-show="main.showTabular && main.showCap" class="container-fluid gs-chart-container capital-cost-container">
+                    <div class="row">
+                        <div class="col col-lg-6 gs-scenario-tbl">
+                            <div class="row gs-tbl-header">
+                                <!--<div class="col ">Cost By LID Control Type</div>-->
+                                <div class="col col-offset-20 col-10 text-center">Drainage Area %</div>
+                                <div class="col col-10 text-center">Has Pre-trt?</div>
+                                <div class="col col-20 text-center gs-tbl-noborder">
+                                    <div class="row"><div class="col">Current Scenario (C)</div></div>
+                                    <div class="row"><div class="col">Area Treated {{main.totSiteAreaCurrent| number:2}} ac</div></div>
+                                </div>
+                                <div class="col col-20 text-center gs-tbl-noborder gs-base-scenario-cont">
+                                    <div class="row"><div class="col">Baseline Scenario (B)</div></div>
+                                    <div class="row"><div class="col">Area Treated {{main.totSiteAreaBaseline| number:2}} ac</div></div>
+                                </div>
+                                <div class="col col-20 text-center gs-tbl-noborder gs-diff-scenario-cont">
+                                    <div class="row"><div class="col">Difference (C - B)</div></div>
+                                    <div class="row"><div class="col">Area Treated {{main.totSiteAreaCurrent - main.totSiteAreaBaseline| number:2}} ac</div></div>
+                                </div>
+                            </div>
+                            <div class="row gs-tbl-header">
+                                <div class="col col-20">Cost By LID Control Type</div>
+                                <div class="col col-10 text-center">Current / Baseline</div>
+                                <div class="col col-10 text-center">Current / Baseline</div>
+                                <div class="col col-10 text-center ">Low</div>
+                                <div class="col col-10 text-center ">High</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont">Low</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont">High</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont">Low</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont">High</div>
+                            </div>
+                            <div class="row" ng-repeat="itm in main.estimatedResults  | limitTo:7">
+                                <div class="col col-20">{{itm.name}}</div>
+                                <div class="col col-10 text-center">{{itm.currentScenarioPercentDrainArea|| 'NA'}} / {{itm.baseScenarioPercentDrainArea|| 'NA'}}</div>
+                                <div class="col col-10 text-center">{{itm.currentScenarioPretreat|| 'NA' }} / {{itm.baseScenarioPretreat|| 'NA'}}</div>
+                                <div class="col col-10 text-center">{{itm.currentScenarioCapCostLow| currency : '$' :0}} </div>
+                                <div class="col col-10 text-center">{{itm.currentScenarioCapCostHigh| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{itm.baseScenarioCapCostLow| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{itm.baseScenarioCapCostHigh| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-show="main.hasBaseline">{{itm.currentScenarioCapCostLow - itm.baseScenarioCapCostLow| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-show="main.hasBaseline">{{itm.currentScenarioCapCostHigh - itm.baseScenarioCapCostHigh| currency : '$' :0}}</div>
+
+                                <!-- no baseline condition -->
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                            </div>
+
+                            <!-- begin totals row -->
+                            <div class="row gs-tbl-header">
+                                <div class="col col-20">Total</div>
+                                <div class="col col-10 text-center">{{main.totalsResults.currentScenarioPercentDrainAreaSum|| 'NA'}} / {{main.totalsResults.baseScenarioPercentDrainAreaSum|| 'NA'}}</div>
+                                <div class="col col-10 text-center">Varies</div>
+                                <div class="col col-10 text-center">{{main.totalsResults.currentScenarioCapCostLowSum | currency : '$' :0}} </div>
+                                <div class="col col-10 text-center">{{main.totalsResults.currentScenarioCapCostHighSum | currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.baseScenarioCapCostLowSum| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.baseScenarioCapCostHighSum | currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.currentScenarioCapCostLowSum - main.totalsResults.baseScenarioCapCostLowSum| currency : '$' :0}}</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.currentScenarioCapCostHighSum - main.totalsResults.baseScenarioCapCostHighSum| currency : '$' :0}}</div>
+
+                                <!-- no baseline condition -->
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col col-10 text-center gs-diff-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                            </div>
+                            <!-- end totals row -->
+
+                            <div class="row gs-tbl-noborder ">
+                                <div class="col">
+                                    <small><span class="gs-bold">Note:</span> site complexity variables that affect cost shown below:</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphical capital costs -->
+                <div ng-show="main.showGraphical && main.showCap" class="container-fluid gs-chart-container capital-cost-container">
+                    <div class="row">
+                        <div class="col col-lg-6 gs-current-scenario-cont gs-graph-cont">
+                            <h5 class="text-center gs-chart-title">Current Scenario</h5>
+                            <div id="cc-bar" class="chart"></div>
+                        </div>
+                        <div ng-show="main.hasBaseline" class="col col-lg-6 gs-base-scenario-cont gs-graph-cont">
+                            <h5 class="text-center gs-chart-title">Baseline Scenario</h5>
+                            <div id="bc-bar" class="chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabular maintenance costs -->
+                <div ng-show="main.showTabular && main.showMaint" class="container-fluid gs-chart-container capital-cost-container">
+                    <div class="row">
+                        <div class="col col-lg-6 gs-scenario-tbl gs-current-scenario-tbl">
+                            <div class="row gs-tbl-header">
+                                <div class="col col-offset-34 text-center">Current Scenario (C)</div>
+                                <div class="col text-center gs-base-scenario-cont">Baseline Scenario (B)</div>
+                                <div class="col text-center">Difference (C - B)</div>
+                            </div>
+                            <div class="row gs-tbl-header">
+                                <div class="col col-34">Cost By LID Control Type</div>
+                                <div class="col text-center">Low</div>
+                                <div class="col text-center">High</div>
+                                <div class="col text-center gs-base-scenario-cont">Low</div>
+                                <div class="col text-center gs-base-scenario-cont">High</div>
+                                <div class="col text-center">Low</div>
+                                <div class="col text-center">High</div>
+                            </div>
+                            <div class="row" ng-repeat="itm in main.estimatedResults  | limitTo:7">
+                                <div class="col col-34">{{itm.name}}</div>
+                                <div class="col text-center">{{itm.currentScenarioMaintCostLow| currency : '$' :0}} </div>
+                                <div class="col text-center">{{itm.currentScenarioMaintCostHigh| currency : '$' :0}}</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{itm.baseScenarioMaintCostLow| currency : '$' :0}}</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{itm.baseScenarioMaintCostHigh| currency : '$' :0}}</div>
+                                <div class="col text-center" ng-show="main.hasBaseline">{{itm.currentScenarioMaintCostLow - itm.baseScenarioMaintCostLow| currency : '$' :0}}</div>
+                                <div class="col text-center" ng-show="main.hasBaseline">{{itm.currentScenarioMaintCostHigh - itm.baseScenarioMaintCostHigh| currency : '$' :0}}</div>
+
+                                <!-- no baseline condition -->
+                                <div class="col text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center" ng-hide="main.hasBaseline">-</div>
+                            </div>
+
+                            <!-- begin totals row-->
+                            <div class="row gs-tbl-header">
+                                <div class="col col-34">Total</div>
+                                <div class="col text-center">{{main.totalsResults.currentScenarioMaintCostLowSum| currency : '$' :0}} </div>
+                                <div class="col text-center">{{main.totalsResults.currentScenarioMaintCostHighSum| currency : '$' :0}}</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.baseScenarioMaintCostLowSum| currency : '$' :0}}</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-show="main.hasBaseline">{{main.totalsResults.baseScenarioMaintCostHighSum| currency : '$' :0}}</div>
+                                <div class="col text-center" ng-show="main.hasBaseline">{{main.totalsResults.currentScenarioMaintCostLowSum - main.totalsResults.baseScenarioMaintCostLowSum| currency : '$' :0}}</div>
+                                <div class="col text-center" ng-show="main.hasBaseline">{{main.totalsResults.currentScenarioMaintCostHighSum - main.totalsResults.baseScenarioMaintCostHighSum| currency : '$' :0}}</div>
+
+                                <!-- no baseline condition -->
+                                <div class="col text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center gs-base-scenario-cont" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center" ng-hide="main.hasBaseline">-</div>
+                                <div class="col text-center" ng-hide="main.hasBaseline">-</div>
+                            </div>
+                            <!-- end totals row-->
+
+                            <div class="row gs-tbl-noborder ">
+                                <div class="col">
+                                    <small><span class="gs-bold">Note:</span> site complexity variables that affect cost shown below:</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphical maintenance costs -->
+                <div ng-show="main.showGraphical && main.showMaint" class="container-fluid gs-chart-container capital-cost-container">
+                    <div class="row">
+                        <div class="col col-lg-6 gs-current-scenario-cont gs-graph-cont">
+                            <h5 class="text-center">Current Scenario</h5>
+                            <div id="cm-bar" class="chart"></div>
+                        </div>
+                        <div ng-show="main.hasBaseline" class="col col-lg-6 gs-base-scenario-cont gs-graph-cont">
+                            <h5 class="text-center">Baseline Scenario</h5>
+                            <div id="bm-bar" class="chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- begin complexity and chart key -->
+                <div class="row gs-complexitykey-cont">
+                    <div class="col gs-complexitykey-cont">
+                        <div>
+                            <!-- begin complexity legend -->
+                            <div class="row">
+                                <div class="col col-25 text-right"></div>
+                                <div class="col gs-bold">Current Scenario</div>
+                                <div ng-show="main.hasBaseline" class="col gs-bold">Baseline Scenario</div>
+                                <div ng-hide="main.hasBaseline" class="col">Baseline Scenario</div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-25 text-right gs-bold gs-complexity-label">Dev. Type</div>
+                                <div class="col">{{main.siteData.currentScenario.complexity.devType}}</div>
+                                <div ng-show="main.hasBaseline" class="col">{{main.siteData.baseScenario.complexity.devType}}</div>
+                                <div ng-hide="main.hasBaseline" class="col">-</div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-25 text-right gs-bold gs-complexity-label">Site Suitability</div>
+                                <div class="col">{{main.siteData.currentScenario.complexity.siteSuit}}</div>
+                                <div ng-show="main.hasBaseline" class="col">{{main.siteData.baseScenario.complexity.siteSuit}}</div>
+                                <div ng-hide="main.hasBaseline" class="col">-</div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-25 text-right gs-bold gs-complexity-label">Topography</div>
+                                <div class="col">{{main.siteData.currentScenario.complexity.topo}}</div>
+                                <div ng-show="main.hasBaseline" class="col">{{main.siteData.baseScenario.complexity.topo}}</div>
+                                <div ng-hide="main.hasBaseline" class="col">-</div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-25 text-right gs-bold gs-complexity-label">Soil Type</div>
+                                <div class="col">{{main.siteData.currentScenario.complexity.soilTypeStr}}</div>
+                                <div ng-show="main.hasBaseline" class="col">{{main.siteData.baseScenario.complexity.soilTypeStr}}</div>
+                                <div ng-hide="main.hasBaseline" class="col">-</div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-25 text-right gs-bold gs-complexity-label">Cost Region</div>
+                                <div class="col">{{main.siteData.currentScenario.blsRegionStr}}</div>
+                                <div ng-show="main.hasBaseline" class="col">{{main.siteData.baseScenario.blsRegionStr}}</div>
+                                <div ng-hide="main.hasBaseline" class="col">-</div>
+                            </div>
+                        </div> <!-- end complexity legend -->
+                    </div>
+                    <div class="col gs-chartkey-cont" ng-show="main.showGraphical">
+                        <div class="text-center gs-bold">Chart Key</div>
+                        <div class="row">
+                            <div class="col" ng-repeat="irow in main.chunkedResults">
+                                <div ng-repeat="itm in irow">{{itm.id| uppercase}} - {{itm.name}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ion-content>
+    </script>
+    <script src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/services/chartEngineSrvc.js"></script>
+    <script src="js/services/costEngineSrvc.js"></script>
+    <script src="js/services/designComplexitySrvc.js"></script>
+    <script type="text/javascript">
+            function initialize() {
+                angular.element(document).ready(function() {
+                    angular.bootstrap(document, ["nscwebappApp"]);
+                });
+            }
+    </script>
+</body>
+</html>

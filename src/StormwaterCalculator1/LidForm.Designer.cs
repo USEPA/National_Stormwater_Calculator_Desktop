@@ -58,6 +58,8 @@
             this.pictureBox10 = new System.Windows.Forms.PictureBox();
             this.lnlLblRainGarden = new System.Windows.Forms.LinkLabel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.lnkLblRGHasPreTreat = new System.Windows.Forms.LinkLabel();
+            this.cbCostRGPreTreat = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.nudRGRimHeight = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
@@ -101,6 +103,8 @@
             this.pictureBox8 = new System.Windows.Forms.PictureBox();
             this.lnkLblInfilBasin = new System.Windows.Forms.LinkLabel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.cbCostIBPreTreat = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.nudIBHeight = new System.Windows.Forms.NumericUpDown();
             this.label24 = new System.Windows.Forms.Label();
@@ -112,6 +116,8 @@
             this.pictureBox9 = new System.Windows.Forms.PictureBox();
             this.lnkLblPorPave = new System.Windows.Forms.LinkLabel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.cbCostPPPreTreat = new System.Windows.Forms.CheckBox();
             this.label21 = new System.Windows.Forms.Label();
             this.nudPPPavementHeight = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
@@ -582,6 +588,8 @@
             this.tableLayoutPanel3.ColumnCount = 2;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel3.Controls.Add(this.lnkLblRGHasPreTreat, 0, 5);
+            this.tableLayoutPanel3.Controls.Add(this.cbCostRGPreTreat, 0, 5);
             this.tableLayoutPanel3.Controls.Add(this.label4, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.nudRGRimHeight, 1, 1);
             this.tableLayoutPanel3.Controls.Add(this.label2, 0, 2);
@@ -601,6 +609,31 @@
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 19F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(300, 184);
             this.tableLayoutPanel3.TabIndex = 0;
+            // 
+            // lnkLblRGHasPreTreat
+            // 
+            this.lnkLblRGHasPreTreat.AutoSize = true;
+            this.lnkLblRGHasPreTreat.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lnkLblRGHasPreTreat.Location = new System.Drawing.Point(3, 153);
+            this.lnkLblRGHasPreTreat.Name = "lnkLblRGHasPreTreat";
+            this.lnkLblRGHasPreTreat.Size = new System.Drawing.Size(219, 15);
+            this.lnkLblRGHasPreTreat.TabIndex = 11;
+            this.lnkLblRGHasPreTreat.TabStop = true;
+            this.lnkLblRGHasPreTreat.Tag = "6";
+            this.lnkLblRGHasPreTreat.Text = "Has Pre-treatment";
+            this.lnkLblRGHasPreTreat.Click += new System.EventHandler(this.lblCostHasPreTreat_Click);
+            // 
+            // cbCostRGPreTreat
+            // 
+            this.cbCostRGPreTreat.AutoSize = true;
+            this.cbCostRGPreTreat.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.cbCostRGPreTreat.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cbCostRGPreTreat.Location = new System.Drawing.Point(228, 156);
+            this.cbCostRGPreTreat.Name = "cbCostRGPreTreat";
+            this.cbCostRGPreTreat.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.cbCostRGPreTreat.Size = new System.Drawing.Size(15, 14);
+            this.cbCostRGPreTreat.TabIndex = 10;
+            this.cbCostRGPreTreat.UseVisualStyleBackColor = true;
             // 
             // label4
             // 
@@ -1216,6 +1249,8 @@
             this.tableLayoutPanel6.ColumnCount = 2;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel6.Controls.Add(this.linkLabel2, 0, 3);
+            this.tableLayoutPanel6.Controls.Add(this.cbCostIBPreTreat, 0, 3);
             this.tableLayoutPanel6.Controls.Add(this.label5, 0, 1);
             this.tableLayoutPanel6.Controls.Add(this.nudIBHeight, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.label24, 0, 2);
@@ -1230,6 +1265,31 @@
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 17F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(300, 118);
             this.tableLayoutPanel6.TabIndex = 0;
+            // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.linkLabel2.Location = new System.Drawing.Point(3, 85);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(219, 15);
+            this.linkLabel2.TabIndex = 16;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Tag = "6";
+            this.linkLabel2.Text = "Has Pre-treatment";
+            this.linkLabel2.Click += new System.EventHandler(this.lblCostHasPreTreat_Click);
+            // 
+            // cbCostIBPreTreat
+            // 
+            this.cbCostIBPreTreat.AutoSize = true;
+            this.cbCostIBPreTreat.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.cbCostIBPreTreat.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cbCostIBPreTreat.Location = new System.Drawing.Point(228, 88);
+            this.cbCostIBPreTreat.Name = "cbCostIBPreTreat";
+            this.cbCostIBPreTreat.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.cbCostIBPreTreat.Size = new System.Drawing.Size(15, 14);
+            this.cbCostIBPreTreat.TabIndex = 12;
+            this.cbCostIBPreTreat.UseVisualStyleBackColor = true;
             // 
             // label5
             // 
@@ -1365,6 +1425,8 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel2.Controls.Add(this.linkLabel1, 0, 4);
+            this.tableLayoutPanel2.Controls.Add(this.cbCostPPPreTreat, 0, 4);
             this.tableLayoutPanel2.Controls.Add(this.label21, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.nudPPPavementHeight, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.label8, 0, 2);
@@ -1381,6 +1443,31 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 17F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(300, 146);
             this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.linkLabel1.Location = new System.Drawing.Point(3, 119);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(219, 15);
+            this.linkLabel1.TabIndex = 17;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Tag = "6";
+            this.linkLabel1.Text = "Has Pre-treatment";
+            this.linkLabel1.Click += new System.EventHandler(this.lblCostHasPreTreat_Click);
+            // 
+            // cbCostPPPreTreat
+            // 
+            this.cbCostPPPreTreat.AutoSize = true;
+            this.cbCostPPPreTreat.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.cbCostPPPreTreat.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.cbCostPPPreTreat.Location = new System.Drawing.Point(228, 122);
+            this.cbCostPPPreTreat.Name = "cbCostPPPreTreat";
+            this.cbCostPPPreTreat.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.cbCostPPPreTreat.Size = new System.Drawing.Size(15, 14);
+            this.cbCostPPPreTreat.TabIndex = 14;
+            this.cbCostPPPreTreat.UseVisualStyleBackColor = true;
             // 
             // label21
             // 
@@ -1542,6 +1629,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "LID Design";
             this.Activated += new System.EventHandler(this.LidForm_Activated);
+            this.Load += new System.EventHandler(this.LidForm_Load);
             this.tabControl1.ResumeLayout(false);
             this.tpDisconnect.ResumeLayout(false);
             this.groupBox8.ResumeLayout(false);
@@ -1711,5 +1799,11 @@
         private System.Windows.Forms.NumericUpDown nudRGCapture;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.NumericUpDown nudSPCapture;
+        private System.Windows.Forms.LinkLabel lnkLblRGHasPreTreat;
+        private System.Windows.Forms.CheckBox cbCostRGPreTreat;
+        private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.CheckBox cbCostIBPreTreat;
+        private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.CheckBox cbCostPPPreTreat;
     }
 }

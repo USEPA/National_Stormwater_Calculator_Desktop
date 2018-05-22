@@ -90,6 +90,7 @@ namespace StormwaterCalculator
         public static double fracRainHarvest;
         public static double fracStreetPlanter;
         public static double fracInfilBasin;
+        public static double totalLIDAreaFrac;  // cost Module addition sum of all LID areas fraction - no costs if 0
 
         // Areas devoted to LIDs
         public static double idImpervArea;  // Impervious area disconnected
@@ -101,6 +102,13 @@ namespace StormwaterCalculator
         public static double grArea;        // Green Roof area
         public static double spArea;        // Street Planter area
         public static double ppArea;        // Porous Pavement area
+
+
+        //cost module additions
+        public static bool isNewDevelopment; //true if scenario represents new development
+        public static bool isReDevelopment; //true if scenario represents re-development
+        public static int siteSuitability; //0 - Site suitability poor, 1 - moderate, 2 - excellent
+
 
         // Indexes of climate change option
         public static int climateScenarioIndex;

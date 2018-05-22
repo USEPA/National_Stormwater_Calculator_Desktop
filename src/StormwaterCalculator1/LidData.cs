@@ -35,6 +35,7 @@ namespace StormwaterCalculator
         public static decimal rgSoilPorosity;
         public static decimal rgSoilKsat;
         public static decimal rgCapture;
+        public static bool rgHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
 
         // Green Roof
         public static decimal grSoilHeight;
@@ -55,6 +56,7 @@ namespace StormwaterCalculator
         // Infiltration Basin
         public static decimal ibHeight;
         public static decimal ibCapture;
+        public static bool ibHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
 
         // Porous Pavement
         public static decimal ppPaveHeight;
@@ -62,6 +64,7 @@ namespace StormwaterCalculator
         public static decimal ppDrainHeight;
         public static decimal ppDrainVoid;
         public static decimal ppCapture;
+        public static bool ppHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
 
         public static void Init()
         // Initializes all LID properties to their default values
@@ -77,6 +80,7 @@ namespace StormwaterCalculator
             rgSoilPorosity = Properties.LidSettings.Default.rgSoilPorosity;
             rgSoilKsat = Properties.LidSettings.Default.rgSoilKsat;
             rgCapture = Properties.LidSettings.Default.rgCapture;
+            rgHasPreTreat = Properties.LidSettings.Default.rgHasPreTreat; //cost module addition to indicate presence / abscence of pretreatment
 
             grSoilHeight = Properties.LidSettings.Default.grSoilHeight;
             grSoilPorosity = Properties.LidSettings.Default.grSoilPorosity;
@@ -94,12 +98,14 @@ namespace StormwaterCalculator
         
             ibHeight = Properties.LidSettings.Default.ibHeight;
             ibCapture = Properties.LidSettings.Default.ibCapture;
-        
+            ibHasPreTreat = Properties.LidSettings.Default.ibHasPreTreat;//cost module addition to indicate presence / abscence of pretreatment
+
             ppPaveHeight = Properties.LidSettings.Default.ppPaveHeight;
             ppPaveVoid = Properties.LidSettings.Default.ppPaveVoid;
             ppDrainHeight = Properties.LidSettings.Default.ppDrainHeight;
             ppDrainVoid = Properties.LidSettings.Default.ppDrainVoid;
             ppCapture = Properties.LidSettings.Default.ppCapture;
+            ppHasPreTreat = Properties.LidSettings.Default.ppHasPreTreat;//cost module addition to indicate presence / abscence of pretreatment
         }
 
         public static bool Validate()

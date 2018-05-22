@@ -50,6 +50,11 @@ using System.Reflection;
 using System.Security.Permissions;
 using System.Runtime.InteropServices;
 using ZedGraph;
+using CefSharp;
+using CefSharp.WinForms;
+using System.Diagnostics;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace StormwaterCalculator
 {
@@ -64,7 +69,7 @@ namespace StormwaterCalculator
         public static extern int swmm_run(string f1, string f2, string f3);
 
         // Release Number
-        public string releaseVersion = "Release 1.1.0.2";
+        public string releaseVersion = "Release 1.2.0.0";
 
         // Actions carried out by a background worker thread
         public enum Actions { GET_SOIL_DATA, GET_RAINFALL, RUN_SWMM, CALC_STATS };
@@ -131,6 +136,329 @@ namespace StormwaterCalculator
 
         LidForm lidForm;                      // Low Impact Development dialog form
         HelpForm helpForm;                    // Help form
+        CostHelp CostHelpForm;                //additions for cost module dialog for cost module help
+
+        //additions for cost module
+        public int costResultsTabIndexNum = 7;  //index of cost module tab on results screen
+        private CostRegionalization CostRegionalization = new CostRegionalization(); //cost regionalization helper object
+        //public ChromiumWebBrowser browser;      // embedded chrome browser used for cost module
+        public static dynamic costModuleResults; //holds cost results computed in JavaScript
+
+        //These declarations are required by additional chromium based web browser control
+        //added for the cost component
+        private static readonly string _myPath = Application.StartupPath;           //used to locate embedded browser files to load
+        private static readonly string _pagesPath = Path.Combine(_myPath, "www");   //used to locate embedded browser files to load
+        public ChromiumWebBrowser _browser;     // embedded chrome browser used for cost module
+        private BrowserLiason BrowserCommunicator; // helper object for managing interactions with embedded browser
+        public delegate void Del(string message); // callback used for communicating with JavaScript
+
+        //used for comunicating with cost module being executed in embedded browser
+        //communication controlled by javascript. When browser is loaded, javascript sends
+        //message to C# to indicate it is ready to accept cost variables, C# sends cost variables
+        //JS computes and sends results back.
+        public class BrowserLiason
+        {
+            public int operationCode = 0; //signals to JS to compute costs. Watched on $scope
+            public string siteData = "";
+            public string jsObj = "";
+            public double lat = 0;
+            public double lng = 0;
+            public bool isBrowserLoaded = false;
+            private int chartWidth = 350; //defaults overwritten later
+            private int chartHeight = 250; //defaults overwritten later
+            dynamic costVariables = new System.Dynamic.ExpandoObject();
+            public CostRegionalization.BlsCenter selectedBLSCenter;
+            private ChromiumWebBrowser _browser;
+
+            public BrowserLiason(ChromiumWebBrowser browser, int width, int height)
+            {
+                this._browser = browser;
+                chartWidth = width - 40;
+                chartHeight = height - 40;
+            }
+            
+            //helper function that allows embedded browser content to better utilize available space when the
+            //application is resized
+            public void onParentContainerResizeHandler(int width,int height)
+            {
+                var chartSize = new
+                {
+                    width = (width / 2) - 20,
+                    height = (height / 2) - 20
+                };
+                string jsObj = JsonConvert.SerializeObject(chartSize);
+                if (jsObj != "") executeInJsNoReturn(@"window.browserLiason.operationCode = 3; window.browserLiason.chartSize =" + jsObj + ";");
+                var cmd1 = "var myScope = angular.element(document.querySelector('#mainPage')).scope(); myScope.resizeChart();";
+                executeInJsNoReturn(cmd1);
+            }
+
+            //re-packages site data / user inputs in a format that JavaScript code expects
+            public dynamic updateSiteData(int scenarioID, ListView lvs, double inputSiteArea = -1.0)
+            {
+
+                    int soilGroup = 0;
+                    string hydSoilGroup = lvs.Items[1].SubItems[2 - scenarioID].Text;
+
+                    switch (hydSoilGroup)
+                    {
+                        case "A":
+                            soilGroup = 0;
+                            break;
+                        case "B":
+                            soilGroup = 1;
+                            break;
+                        case "C":
+                            soilGroup = 2;
+                            break;
+                        case "D":
+                            soilGroup = 3;
+                            break;
+                        default:
+                            soilGroup = 0;
+                            break;
+                    }
+                    var complexity = new
+                    {
+                        siteimperv = lvs.Items[11].SubItems[2 - scenarioID].Text,
+                        sitearea = lvs.Items[0].SubItems[2 - scenarioID].Text,
+                        sitesoilksat = lvs.Items[2].SubItems[2 - scenarioID].Text,
+                        isNewDevelopment = SiteData.isNewDevelopment,
+                        isReDevelopment = !SiteData.isNewDevelopment,
+                        siteSuitability = SiteData.siteSuitability,
+                        topography = Array.FindIndex(SiteData.slope, row => row.Contains(lvs.Items[3].SubItems[2 - scenarioID].Text)),
+                        soilType = soilGroup
+                    };
+
+                    double conv = Convert.ToDouble(43560.0 / (100.0 * 100.0)); //conversion factor to convert from % *% * acres to sq. feet
+                  
+                    string[] tempArr; //temporary array for splitting "lidArray % of area value / % of area used for lid control value"
+                    double[] fpAreas = new Double[12]; //temporary array for holding lid control surface areas in sqft
+                    double[] percentDrainArea = new Double[12]; //temporary array for holding % area draining to lid control 
+                    double[] percentFPRatio = new Double[12]; //temporary array for holding % area draining to lid control 
+                double dblSiteArea = 0.0;
+                if (lvs.Items[0].SubItems[2 - scenarioID].Text != "N/A")
+                {
+                    dblSiteArea = Convert.ToDouble(lvs.Items[0].SubItems[2 - scenarioID].Text);
+                }
+
+                for (int i = 0; i < 7; i++)
+                {
+                    tempArr = lvs.Items[i + 12].SubItems[2 - scenarioID].Text.Split('/');
+                    if (tempArr.Length > 1)
+                    {
+                        percentDrainArea[i] = Convert.ToDouble(tempArr[0]);
+                        fpAreas[i] = conv * dblSiteArea * Convert.ToDouble(tempArr[0]) * Convert.ToDouble(tempArr[1]);
+                    }
+                    else
+                    {
+                        percentDrainArea[i] = 0;
+                        fpAreas[i] = 0;
+                    }
+                }
+                    //cisterns treated differently
+                    if(fpAreas[1] > 0) //if area was assigned to rain harvesting recompute volume in gallons
+                        fpAreas[1] = 0.001* 43560 * dblSiteArea * (percentDrainArea[1]/100)*Convert.ToDouble(LidData.rhSize * LidData.rhNumber); //rhNumber is # per 1000 so mult by 0.001
+
+                var scenarioLids = new
+                    {
+                        id = new { id = "id", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[0], name = "Disconnection", footprintAreaSqFt = Math.Round(fpAreas[0]), area = lvs.Items[12].SubItems[2 - scenarioID].Text, hasPretreatment = false },
+                        rh = new { id = "rh", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[1], name = "Rainwater Harvesting", footprintAreaSqFt = Math.Round(fpAreas[1]), area = lvs.Items[13].SubItems[2 - scenarioID].Text, hasPretreatment = false },
+                        rg = new { id = "rg", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[2], name = "Rain Gardens", footprintAreaSqFt = Math.Round(fpAreas[2]), area = lvs.Items[14].SubItems[2 - scenarioID].Text, hasPretreatment = LidData.rgHasPreTreat },
+                        gr = new { id = "gr", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[3], name = "Green Roofs", footprintAreaSqFt = Math.Round(fpAreas[3]), area = lvs.Items[15].SubItems[2 - scenarioID].Text, hasPretreatment = false },
+                        sp = new { id = "sp", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[4], name = "Street Planters", footprintAreaSqFt = Math.Round(fpAreas[4]), area = lvs.Items[16].SubItems[2 - scenarioID].Text, hasPretreatment = false },
+                        ib = new { id = "ib", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[5], name = "Infiltration Basins", footprintAreaSqFt = Math.Round(fpAreas[5]), area = lvs.Items[17].SubItems[2 - scenarioID].Text, hasPretreatment = LidData.ibHasPreTreat },
+                        pp = new { id = "pp", totSiteArea = dblSiteArea, percentDrainArea = percentDrainArea[6], name = "Permeable Pavement", footprintAreaSqFt = Math.Round(fpAreas[6]), area = lvs.Items[18].SubItems[2 - scenarioID].Text, hasPretreatment = LidData.ppHasPreTreat }
+                    };
+
+                var tempObj = new
+                {
+                    complexity = complexity,
+                    costvars = scenarioLids,
+                    blsRegionStr = selectedBLSCenter.selectString,
+                    regionalFactor = selectedBLSCenter.regionalFactor,
+                    inflation = selectedBLSCenter.inflationFactor,
+                    dataYear = selectedBLSCenter.dataYear,
+                    chartSize = new
+                    {
+                        width = chartWidth / 2,
+                        height = chartHeight / 2
+                    }
+                };
+
+                jsObj = JsonConvert.SerializeObject(costVariables);
+                Console.WriteLine(jsObj);
+                if (scenarioID == 0)
+                {
+                    costVariables.baseScenario = tempObj;
+                } else {
+                    costVariables.currentScenario = tempObj;
+                }
+                return costVariables;
+            }
+
+            //called to stash baseline or current scenario site and lid 
+            //variables for passing to the cost module later 
+            //Scenario 0 - base, Scenario 1 - current
+            public bool updateCostVariables(int scenarioID, ListView lvs, double inputSiteArea = -1.0)
+            {
+                /*if(checkSiteDataValid(inputSiteArea) == false)
+                {
+                    return false;
+                }*/
+                var tempObj = new
+                {
+                    complexity = "",
+                    costvars = "",
+                    lng = lng, //updated in Mainform.tcMainTop_SelectedIndexChanged if latLngChanged is true
+                    lat = lat //updated in Mainform.tcMainTop_SelectedIndexChanged if latLngChanged is true
+                };
+
+                /*//if sitearea = 0 exit function
+                if (inputSiteArea == 0)
+                    scenarioID = -1;*/
+
+                switch (scenarioID)
+                {
+                    case -1:
+                        //costVariables.baseScenario = tempObj;
+                        costVariables.currentScenario = tempObj;
+                        break;
+                    case 3:
+                        costVariables.baseScenario = tempObj;
+                        break;
+                    default:
+                        costVariables = updateSiteData(scenarioID, lvs, inputSiteArea);
+                        break;
+                }
+                jsObj = JsonConvert.SerializeObject(costVariables);
+                //Console.WriteLine(jsObj);
+
+                //if browser is ready send updated siteData
+                if (isBrowserLoaded)
+                    sendToCSharp("", 2);
+                return true;
+            }
+
+            //used to communicate from JS to C#
+            public void sendToCSharp(string browserJson, int statusFlag)
+            {
+                switch (statusFlag)
+                {
+                    case 1://recieve computed costs from JS
+                        dynamic tempObj = JsonConvert.DeserializeObject<dynamic>(browserJson);
+                        costModuleResults = tempObj;                        
+                        break;
+                    case 2://JS wants site data to compute costs with
+                        if (jsObj != "") executeInJsNoReturn(@"window.browserLiason.jsObj =" + jsObj + ";");
+                        var cmd1 = "var myScope = angular.element(document.querySelector('#mainPage')).scope(); myScope.updateSiteData();";
+                        executeInJsNoReturn(cmd1);
+                        break;
+                    default:
+                        Console.WriteLine("An error occured in BrowserLiason.sendToCSharp");
+                        break;
+                }
+                Console.WriteLine(browserJson);
+            }
+
+            //executes code in JS and does not wait for a return value
+            public void executeInJsNoReturn(string scriptTxtToExec)
+            {
+                //check to see if browser ready before attempting to execute script
+               if(_browser.Created) {
+                    _browser.ExecuteScriptAsync(scriptTxtToExec);
+                }
+                
+            }
+
+            //executes code in JS and can receive a response after execution via a callback
+            public void executeInJSWithReturn(string scriptTxtToExec, Del callback)
+            {
+                var task = _browser.EvaluateScriptAsync(scriptTxtToExec);
+                task.ContinueWith(t =>
+                {
+                    if (!t.IsFaulted)
+                    {
+                        //Recieve value from JS
+                        //var response = t.Result;
+                        if (t.Result.Success == true)
+                        {
+                            // Use JSON.net to convert to object;
+                            if (t.Result.Result != null)
+                            {
+                                Console.WriteLine(t.Result.Result.ToString());
+                                callback(t.Result.Result.ToString());
+                            }                            
+                        }
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+            }
+
+        }
+        private string GetPagePath(string pageName)
+        {
+            return Path.Combine(_pagesPath, pageName);
+        }
+
+        //initializes embedded chrome browser
+        private void InitializeBrowserControl()
+        {
+            //for debugging var settings = new CefSettings { RemoteDebuggingPort = 8088 };
+            var settings = new CefSettings { };
+            //Perform dependency check to make sure all relevant resources are in our output directory.
+            bool flag = Cef.Initialize(settings, shutdownOnProcessExit: true, performDependencyCheck: true);
+            if (!flag)
+            {
+                Console.WriteLine("Failed to initialize CefSharp browser");
+            }
+
+            string pagePath = GetPagePath("costModule.html");
+            _browser = new ChromiumWebBrowser(pagePath);
+            BrowserCommunicator = new BrowserLiason(_browser, tpCost.Width, tpCost.Height);
+
+            tpCost.Controls.Add(_browser);
+            _browser.Dock = DockStyle.Fill;
+            _browser.BringToFront();
+
+            _browser.AddressChanged += BrowserAddressChanged;
+            _browser.LoadError += BrowserLoadError;
+            _browser.StatusMessage += BrowserStatusMessage;
+            _browser.TitleChanged += BrowserTitleChanged;
+
+            _browser.RegisterJsObject("browserLiason", BrowserCommunicator);
+        }
+        void BrowserTitleChanged(object sender, TitleChangedEventArgs e)
+        {
+            LogMessage("TITLE CHANGED: " + e.Title);
+        }
+
+        void BrowserStatusMessage(object sender, StatusMessageEventArgs e)
+        {
+            LogMessage("STATUS MESSAGE: " + e.Value);
+        }
+
+        void BrowserLoadError(object sender, LoadErrorEventArgs e)
+        {
+            string messageText = String.Format("{0} ({1} [{2}])", e.ErrorText, e.FailedUrl, e.ErrorCode);
+            LogMessage("LOAD ERROR: " + messageText);
+        }
+
+        void BrowserConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        {
+            string messageText = String.Format("{0}: {1} ({2})", e.Line, e.Message, e.Source);
+            LogMessage("CONSOLE MESSAGE: " + messageText);
+        }
+
+        void BrowserAddressChanged(object sender, AddressChangedEventArgs e)
+        {
+            //let the browser communicator know that the browser has been loaded
+            BrowserCommunicator.isBrowserLoaded = true;
+            LogMessage("ADDRESS CHANGED: " + e.Address);
+        }
+
+        private void LogMessage(string messageText)
+        {
+            Console.WriteLine(messageText);
+        }
 
         //-----------------------------------------------------------------------------
         //                   Form creation, initialization and closing 
@@ -177,6 +505,8 @@ namespace StormwaterCalculator
                 path = "file://" + path;
                 webBrowser1.Navigate(path);
             }
+            //InitBrowser();
+            InitializeBrowserControl();
 
             // Load SCS 24-hour rainfall distributions
             if (!Xevent.ReadScsDistributions())
@@ -201,6 +531,7 @@ namespace StormwaterCalculator
             // Create LID and Help forms
             lidForm = new LidForm();
             helpForm = new HelpForm();
+            CostHelpForm = new CostHelp();
             helpForm.Owner = this;
             helpForm.Width = 270 * MainForm.dpi / 96;
             helpForm.Height = 300 * MainForm.dpi / 96;
@@ -342,6 +673,9 @@ namespace StormwaterCalculator
         {
             // Prompt user to save current site
             e.Cancel = (SaveSiteData() == DialogResult.Cancel);
+
+            //additions for cost module to shut down embedded chrominum browser
+            Cef.Shutdown();
         }
 
         private void mainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -378,11 +712,50 @@ namespace StormwaterCalculator
                 if (soilDataRetrieved) GetSoilData();
                 GeoData.ShowSiteData(this);
                 latLngChanged = false;
+
+                //additions for cost module
+                getBLSDataAndPopulateControls( lat,  lng);
             }
             if (mapBoundsSaved) RestoreMapBounds();
 
             // Change the page displayed in the left panel
             tcMainLeft.SelectedIndex = tcMainTop.SelectedIndex;
+        }
+
+        //additions for cost module obtains bls regional cost data for lat lng and populates controls
+        private void getBLSDataAndPopulateControls(double lat, double lng, int SelectedIndex=-1)
+        {
+            //if coordinates have not changed do not re-aquire data for efficiency reasons
+            if (SelectedIndex == -1 && BrowserCommunicator.lat == lat && BrowserCommunicator.lng == lng) return;
+            
+            statusLabel.Text = "Retrieving regional cost data...";
+
+            BrowserCommunicator.lat = lat;
+            BrowserCommunicator.lng = lng;
+            //prep bls data
+            List<CostRegionalization.BlsCenter> BlsCenterData = CostRegionalization.parseRegDataAndComputeDist(lat, lng);
+            //Setup data binding
+            this.cmbCostRegion.DataSource = BlsCenterData;
+            this.cmbCostRegion.DisplayMember = "selectString";
+
+            // leave out value member so can get whole object this.cmbCostRegion.ValueMember = "regionalFactor";
+            if (SelectedIndex != -1)
+            {
+                cmbCostRegion.SelectedIndex = SelectedIndex;
+                cmbCostRegion_SelectedIndexChanged(cmbCostRegion, new EventArgs());
+            }else
+            {
+                //select the nearest center if it is with minimum distance of the center or use national as the default
+                if(BlsCenterData[0].distToCurrentPoint > CostRegionalization.BlsCenter.maxValidityDistance)
+                {
+                    cmbCostRegion.SelectedIndex = CostRegionalization.BlsCenter.positionOfNationalDefaultInList; 
+                }
+                else
+                {
+                    cmbCostRegion.SelectedIndex = 0; 
+                }
+                cmbCostRegion_SelectedIndexChanged(cmbCostRegion, new EventArgs());
+            }
         }
 
         // OnChange handler for the left panel's tab control
@@ -398,6 +771,21 @@ namespace StormwaterCalculator
                 tcMainRight.SelectedTab = tpResultsRight;
                 ChangeRefreshResultsState();
                 DisplaySiteSummary();
+
+                //additions for cost module
+                //check to see if chrome browser loaded and load if not alread loaded
+                if (BrowserCommunicator.isBrowserLoaded == false)
+                {
+                    //momentarily switch to costmodule to load embedded browser
+                    int tempIndex = tcResults.SelectedIndex;
+                    tcResults.SelectedIndex = costResultsTabIndexNum;
+                    tcResults.SelectedIndex = tempIndex;
+            }
+                //scenarioid 0 is baseline, 1 is current scenario, 3 - remove baseline results
+                //make sure form variables read in and updated
+                GetSiteInfo();
+                BrowserCommunicator.updateCostVariables(1, lvSiteSummary,(Double)nudSiteArea.Value);
+                this.Cursor = Cursors.Default;
             }
             else if (tcMainLeft.SelectedTab == tpClimateLeft)
             {
@@ -698,6 +1086,18 @@ namespace StormwaterCalculator
             this.Cursor = Cursors.Default;
             if (errorCode == 0)
             {
+                //additions for cost module update costs by loading browser here and then continue displaying results
+                if (BrowserCommunicator.isBrowserLoaded == false)
+                {
+                    int tempIndex = tcResults.SelectedIndex;
+                    tcResults.SelectedIndex = costResultsTabIndexNum;
+                    tcResults.SelectedIndex = tempIndex;
+                }
+
+                //additions for cost module scenarioid 0 is baseline, 1 is current scenario, 3 - remove baseline results
+                GetSiteInfo();
+                BrowserCommunicator.updateCostVariables(1, lvSiteSummary, (Double)nudSiteArea.Value);
+
                 DisplayAnalysisOptions();
                 DisplayResults();
                 inputHasChanged = false;
@@ -715,6 +1115,19 @@ namespace StormwaterCalculator
             DisplayBaselineResults();
             mnuAddBaseline.Enabled = false;
             mnuRemoveBaseline.Enabled = true;
+
+            //additions for cost module update costs by loading browser here and then continue displaying results
+            if (BrowserCommunicator.isBrowserLoaded == false)
+            {
+                int tempIndex = tcResults.SelectedIndex;
+                tcResults.SelectedIndex = costResultsTabIndexNum;
+                tcResults.SelectedIndex = tempIndex;
+        }
+
+            //scenarioid 0 is baseline, 1 is current scenario, 3 - remove baseline results
+            GetSiteInfo();
+            BrowserCommunicator.updateCostVariables(0, lvSiteSummary, (Double)nudSiteArea.Value);
+
         }
 
         // OnLinkClicked handler for the Remove Baseline Scenario link label
@@ -723,19 +1136,47 @@ namespace StormwaterCalculator
             RemoveBaselineResults();
             mnuRemoveBaseline.Enabled = false;
             mnuAddBaseline.Enabled = true;
+
+            //additions for cost module
+            //scenarioid 0 is baseline, 1 is current scenario, 3 - remove baseline results
+            GetSiteInfo();
+            BrowserCommunicator.updateCostVariables(3, lvSiteSummary);
         }
 
         // OnLinkClicked handler for the Print Results link label
         private void mnuPrintResults_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            int tempIndex = tcResults.SelectedIndex;
+            //additions for cost module check if costmodule has been loaded in browser and load it if not
+            if (BrowserCommunicator.isBrowserLoaded == false)
+            {
+                //momentarily switch to costmodule to load in browser
+                tcResults.SelectedIndex = costResultsTabIndexNum;
+                tcResults.SelectedIndex = tempIndex;
+            }
+            if (Object.ReferenceEquals(null, costModuleResults))
+            {
+                //momentarily switch to costmodule to load in browser
+                tcResults.SelectedIndex = costResultsTabIndexNum;
+                tcResults.SelectedIndex = tempIndex;
+            }
             WriteResultsToFile();
         }
 
         // OnClick handler for the various results selection radio buttons
         private void ResultsBtn_Clicked(object sender, EventArgs e)
         {
-            helpForm.Hide();
             RadioButton rb = (RadioButton)sender;
+            //additions for cost module
+            if (rb.TabIndex == costResultsTabIndexNum)
+            {
+                this.Cursor = Cursors.WaitCursor;
+                //scenarioid 0 is baseline, 1 is current scenario, 3 - remove baseline results
+                GetSiteInfo();
+                BrowserCommunicator.updateCostVariables(1, lvSiteSummary, (Double)nudSiteArea.Value);
+                this.Cursor = Cursors.Default;
+            }
+            helpForm.Hide();
             tcResults.SelectedIndex = rb.TabIndex;
             rb.Focus();
         }
@@ -750,6 +1191,9 @@ namespace StormwaterCalculator
             InitControls();
             LidData.Init();
             tcMainTop.SelectedIndex = 1;
+            //additions for cost module
+            //reset current scenario
+            BrowserCommunicator.updateCostVariables(1, lvSiteSummary, -1);
         }
 
         // OnClick handler for the Save Current Site label
@@ -942,6 +1386,17 @@ namespace StormwaterCalculator
             SiteData.fracStreetPlanter = (double)nudStreetPlanter.Value / 100.0;
             SiteData.fracInfilBasin = (double)nudInfilBasin.Value / 100.0;
             SiteData.fracPorousPave = (double)nudPorousPave.Value / 100.0;
+
+            //additions for cost module
+            SiteData.totalLIDAreaFrac = SiteData.fracImpDiscon + SiteData.fracRainHarvest + SiteData.fracRainGarden + SiteData.fracGreenRoof + SiteData.fracStreetPlanter + SiteData.fracInfilBasin + SiteData.fracPorousPave;
+            SiteData.isNewDevelopment =rbCostNewDev.Checked;
+            SiteData.isReDevelopment= rbCostRedev.Checked;
+
+            //Cost complexity siteSuitabiltiy
+            SiteData.siteSuitability = 0;
+            if(rbCostSitePoor.Checked) SiteData.siteSuitability = 0;
+            if (rbCostSiteModerate.Checked) SiteData.siteSuitability = 1;
+            if (rbCostSiteExcellent.Checked) SiteData.siteSuitability = 2;
 
             // Check for valid LID inputs
             return LidData.Validate();
@@ -1342,6 +1797,20 @@ namespace StormwaterCalculator
 
                 sw.WriteLine("ClimateScenario      " + GetClimateIndex());          //43
                 sw.WriteLine("ClimateYear          " + SiteData.climateYear);       //44
+
+                //additions for cost module
+                sw.WriteLine("%BEGIN VARS ADDED FOR COST          ");               //45
+                sw.WriteLine("isNewDevelopment   " + rbCostNewDev.Checked);         //46
+                sw.WriteLine("isReDevelopment   " + rbCostRedev.Checked);           //47
+                sw.WriteLine("siteSuitabilityPoor   " + rbCostSitePoor.Checked);    //48
+                sw.WriteLine("siteSuitabilityModerate   " + rbCostSiteModerate.Checked); //49
+                sw.WriteLine("siteSuitabilityExcellent   " + rbCostSiteExcellent.Checked); //50
+                sw.WriteLine("rgPretreatment   " + LidData.rgHasPreTreat);          //51
+                sw.WriteLine("ibPretreatment   " + LidData.ibHasPreTreat);          //52
+                sw.WriteLine("ppPretreatment   " + LidData.ppHasPreTreat);          //53
+                sw.WriteLine("cmbCostRegion   " + cmbCostRegion.SelectedIndex);     //54
+                sw.WriteLine("tbRegMultiplier   " + tbRegMultiplier.Text);          //55
+                sw.WriteLine("%END VARS ADDED FOR COST          ");                 //56
             }
         }
 
@@ -1398,6 +1867,14 @@ namespace StormwaterCalculator
                     InvokeBrowserScript("setSiteRadius", radius);
                     inputHasChanged = false;
                     inputSaved = true;
+
+                    //additions for cost module now obtain bls data and compute cost regionalization variables
+                    int selectedCostCmbIndex = 0;
+                    if(values.Length > 54) //older saved files for previous version will not have saved this
+                    {
+                        selectedCostCmbIndex = Convert.ToInt16(values[54]);
+                }
+                    getBLSDataAndPopulateControls(lat, lng, selectedCostCmbIndex);
                 }
                 catch (System.FormatException ex)
                 {
@@ -1502,7 +1979,8 @@ namespace StormwaterCalculator
             cbIgnoreConsecDays.Checked = (values[42] == "True");
 
             // Climate change scenario
-            if (values.Length == 45 )
+            //additions for cost module cost module change if (values.Length == 45 )
+            if (values.Length >= 45)
             {
                 switch (Int32.Parse(values[43]))
                 {
@@ -1514,6 +1992,31 @@ namespace StormwaterCalculator
                 if (Int32.Parse(values[44]) == 2035) rbClimate2035.Checked = true;
                 if (Int32.Parse(values[44]) == 2060) rbClimate2060.Checked = true;
             }
+
+            //additions for cost module
+            if (values.Length > 45)
+            {
+                //Cost complexity isNewDevelopment
+                rbCostNewDev.Checked = (values[46] == "True");
+                rbCostRedev.Checked = (values[47] == "True");
+
+                //Cost complexity siteSuitabiltiy
+                rbCostSitePoor.Checked = (values[48] == "True");
+                rbCostSiteModerate.Checked = (values[49] == "True");
+                rbCostSiteExcellent.Checked = (values[50] == "True");
+
+                //Rain garden pre-treatment
+                LidData.rgHasPreTreat = (values[51] == "True");
+
+                //Infiltration basin pre-treatment
+                LidData.ibHasPreTreat = (values[52] == "True");
+
+                //Permeable pavement pre-treatment
+                LidData.ppHasPreTreat = (values[53] == "True");
+
+                //cost regionalization variables
+                // done outside this function after lat long obtained
+        }
         }
 
         private void WriteResultsToFile()
@@ -1562,6 +2065,9 @@ namespace StormwaterCalculator
                 rw.WriteImagePage(tbSiteName.Text, myImage1, myImage2, "plot5",
                     "plot6", aspectRatio);
 
+                // Write capital cost summary
+                rw.WriteCostSummaryPage(tbSiteName.Text, costModuleResults);
+                
                 rw.CreatePDF(pdfFileName);
             }
         }
@@ -1840,6 +2346,40 @@ namespace StormwaterCalculator
 
             // Draw the focus rectangle if appropriate.
             e.DrawFocusRectangle();
+        }
+
+        //additions for cost module
+        //added to resize cost module web browser graphics when form changes
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            if (BrowserCommunicator.isBrowserLoaded == true)
+            {
+                BrowserCommunicator.onParentContainerResizeHandler(tpCost.Width, tpCost.Height);
+            }
+        }
+
+        //additions for cost module
+        private void cmbCostRegion_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var currentMyComboBoxIndex = cmbCostRegion.SelectedIndex;
+            CostRegionalization.BlsCenter selectedBLSCenter = cmbCostRegion.SelectedValue as CostRegionalization.BlsCenter;
+            tbRegMultiplier.Text = selectedBLSCenter.regionalFactor.ToString();
+            if (selectedBLSCenter.blsCity == "Other")
+            {
+                tbRegMultiplier.Enabled = true;
+            }
+            else
+            {
+                tbRegMultiplier.Enabled = false;
+            }
+            BrowserCommunicator.selectedBLSCenter = selectedBLSCenter;
+        }
+
+        private void llCostModuleHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            LinkLabel linkLabel = (LinkLabel)sender;
+            CostHelpForm.activePageIndex = Int32.Parse((String)linkLabel.Tag);
+            CostHelpForm.ShowDialog();
         }
     }
 }
