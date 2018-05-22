@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <Product Id="*" Name="NationalStormwaterCalculator" Language="1033"
+           Version="1.2.0.0" Manufacturer="US EPA" UpgradeCode="cd38395f-3971-4a9c-9742-9d2af461e2d3">
+
+    <!-- perMachine install scope requires admin privileges perUser does not -->
+    <Package InstallerVersion="300" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <MediaTemplate EmbedCab="yes" CompressionLevel="mszip" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <!-- Define installation directory -->
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Stormwater Calculator">
+          <!-- Define installation subfolders www\ -->
+          <Directory Id="WWWFolder" Name="www">
+            <!-- Define installation subfolders www\css\ -->
+            <Directory Id="CSSFolder" Name="css"/>
+            <!-- Define installation subfolders www\js\ -->
+            <Directory Id="JSFolder" Name="js">
+              <!-- Define installation subfolders www\js\lib\-->
+              <Directory Id="LIBFolder" Name="lib"/>
+              <!-- Define installation subfolders www\js\services\ -->
+              <Directory Id="SERVICESFolder" Name="services"/>
+            </Directory>
+          </Directory>
+          <!-- Define installation subfolders locales\ -->
+          <Directory Id="LOCALESFolder" Name="locales"/>
+        </Directory>
+      </Directory>
+      
+      <!-- Define directory for program menu shortcut -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgMenuFolder" Name="StormwaterCalc"/>
+      </Directory>
+
+      <!-- Define directory for desktop shortcut -->
+      <Directory Id="DesktopFolder" Name="Desktop"/>
+    </Directory>
+
+    <!-- Define components to be installed -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="MainExecutable">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\StormwaterCalculator.exe" >
+
+          <!-- Program menu shortcut -->
+          <Shortcut Id="StartMenuShortcut" Directory="ProgMenuFolder" Name="StormwaterCalc" WorkingDirectory="INSTALLFOLDER"
+                    Icon="StormwaterCalc01.exe" IconIndex="0" Advertise="yes">
+            <Icon Id="StormwaterCalc01.exe" SourceFile="$(var.StormwaterCalculator.TargetDir)\epa3.ico" />
+          </Shortcut>
+
+          <!-- Desktop shortcut -->
+          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="StormwaterCalc" WorkingDirectory="INSTALLFOLDER"
+                    Icon="StormwaterCalc02.exe" IconIndex="0" Advertise="yes">
+            <Icon Id="StormwaterCalc02.exe" SourceFile="$(var.StormwaterCalculator.TargetDir)\epa3.ico" />
+          </Shortcut>
+
+        </File>
+      </Component>
+
+      <Component Id="ConfigFile">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\StormwaterCalculator.exe.config" />
+      </Component>
+
+      <Component Id="D4EMLiteLibrary">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\SWC_D4EMLite.dll" />
+      </Component>
+
+      <Component Id="SWMMLibrary">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\swmm5.dll" />
+      </Component>
+
+      <Component Id="SharpPDFLibrary">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\sharpPDF.dll" />
+      </Component>
+
+      <Component Id="ZedGraphLibrary">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\ZedGraph.dll" />
+      </Component>
+
+      <!-- Additional Components for Cost Update that get copied directly to install dir-->
+      <!-- Required Cef Dependencies -->
+      <Component Id="CefCoreLibrary">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\libcef.dll" />
+      </Component>
+
+      <Component Id="CefUnicodeSupport">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\icudtl.dat" />
+      </Component>
+      
+      <Component Id="CefCoreLibNativesBlob">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\natives_blob.bin" />
+      </Component>
+
+      <Component Id="CefCoreLibSnapshotBlob">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\snapshot_blob.bin" />
+      </Component>
+      
+      <!-- Cef Resources -->
+      <Component Id="WebKitInspectorResource">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\cef.pak" />
+      </Component>
+
+      <Component Id="WebKitInspectorResourceExtensions">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\cef_extensions.pak" />
+      </Component>
+      
+      <Component Id="WebKitInspectorResource100PercentDPI">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\cef_100_percent.pak" />
+      </Component>
+
+      <Component Id="WebKitInspectorResource200PercentDPI">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\cef_200_percent.pak" />
+      </Component>
+
+      <Component Id="DeveloperToolsResource">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\devtools_resources.pak" />
+      </Component>
+
+      <!-- Cef Optional Dependencies --> 
+      <Component Id="AngleLibEGL">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\libEGL.dll" />
+      </Component>
+
+      <Component Id="AngleLibEGLSV2">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\libGLESv2.dll" />
+      </Component>
+      
+      <Component Id="CefD3DCompiler47">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\d3dcompiler_47.dll" />
+      </Component>
+
+      <Component Id="WideVineContentDecryptionModuleAdapter">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\widevinecdmadapter.dll" />
+      </Component>
+      
+      <!-- CefSharp Dependencies -->
+      <Component Id="CefSharpCoreLib">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\CefSharp.Core.dll" />
+      </Component>
+      
+      <Component Id="CefSharpLib">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\CefSharp.dll" />
+      </Component>
+
+      <!-- Browser Subprocess Dependencies -->
+      <Component Id="BrowserSubprocessCore">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\CefSharp.BrowserSubprocess.Core.dll" />
+      </Component>
+
+      <Component Id="BrowserSubprocessExecutable">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\CefSharp.BrowserSubprocess.exe" />
+      </Component>
+      
+      <!-- CefSharp WinForms Components -->
+      <Component Id="CefSharpWinformsControls">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\CefSharp.WinForms.dll" />
+      </Component>
+      
+      <!-- MS Visual C++ Redistributable Required by CefSharp -->
+      <Component Id="MSCPRuntimeLibraryV120">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\msvcp120.dll" />
+      </Component>
+
+      <Component Id="MSCRRuntimeLibraryV120">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\msvcr120.dll" />
+      </Component>
+
+      <Component Id="MSVCWinRTCoreLibraryV120">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\vccorlib120.dll" />
+      </Component>
+
+      <!-- Other Components -->
+      <Component Id="StandardOLE">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\stdole.dll" />
+      </Component>
+
+      <Component Id="NewtonSoftJson">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\Newtonsoft.Json.dll" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Components installed in subfolders within install dir -->
+    <!-- Components installed in www folder -->
+    <DirectoryRef Id="WWWFolder">
+      <Component Id="CostModuleHTML">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\costModule.html" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Components for www\css -->
+    <DirectoryRef Id="CSSFolder">
+      <Component Id="IonicMinCSS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\css\ionic.min.css" />
+      </Component>
+
+      <Component Id="StyleCSS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\css\style.css" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Components for www\js -->
+    <DirectoryRef Id="JSFolder">
+      <Component Id="AppJS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\app.js" />
+      </Component>
+
+      <Component Id="ControllersJS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\controllers.js" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Components for www\js\lib -->
+    <DirectoryRef Id="LIBFolder">
+      <Component Id="PlotlyJS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\lib\plotly.js" />
+      </Component>
+
+      <Component Id="PlotlyMinJS">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\lib\plotly.min.js" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Components for www\js\services -->
+    <DirectoryRef Id="SERVICESFolder">
+      <Component Id="ChartEngineService">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\services\chartEngineSrvc.js" />
+      </Component>
+
+      <Component Id="CostEngineService">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\services\costEngineSrvc.js" />
+      </Component>
+
+      <Component Id="DesignComplexityService">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\www\js\services\designComplexitySrvc.js" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- CefSharp Locale Pack -->
+    <DirectoryRef Id="LOCALESFolder">
+      <Component Id="EnglishUSLanguagePak">
+        <File Source="$(var.StormwaterCalculator.TargetDir)\locales\en-US.pak" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Program shortcut removed on uninstall -->
+    <DirectoryRef Id="ProgMenuFolder" >
+      <Component Id="ApplicationShortcut">
+        <RemoveFolder Id="ProgMenuFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <ComponentGroup Id="StormwaterCalculator">
+      <ComponentRef Id="MainExecutable"/>
+      <ComponentRef Id="ConfigFile"/>
+      <ComponentRef Id="D4EMLiteLibrary"/>
+      <ComponentRef Id="SWMMLibrary"/>
+      <ComponentRef Id="SharpPDFLibrary"/>
+      <ComponentRef Id="ZedGraphLibrary"/>
+      <ComponentRef Id="ApplicationShortcut"/>
+      <!-- New web components for cost feature -->
+      <ComponentRef Id="CostModuleHTML"/>
+      <ComponentRef Id="IonicMinCSS"/>
+      <ComponentRef Id="StyleCSS"/>
+      <ComponentRef Id="AppJS"/>
+      <ComponentRef Id="ControllersJS"/>
+      <ComponentRef Id="PlotlyJS"/>
+      <ComponentRef Id="PlotlyMinJS"/>
+      <ComponentRef Id="ChartEngineService"/>
+      <ComponentRef Id="CostEngineService"/>
+      <ComponentRef Id="DesignComplexityService"/>
+    </ComponentGroup>
+    
+    <ComponentGroup Id="CefRedistPackage">
+      <ComponentRef Id="CefCoreLibrary"/>
+      <ComponentRef Id="CefUnicodeSupport"/>
+      <ComponentRef Id="CefCoreLibNativesBlob"/>
+      <ComponentRef Id="CefCoreLibSnapshotBlob"/>
+      <ComponentRef Id="WebKitInspectorResource"/>
+      <ComponentRef Id="WebKitInspectorResourceExtensions"/>
+      <ComponentRef Id="WebKitInspectorResource100PercentDPI"/>
+      <ComponentRef Id="WebKitInspectorResource200PercentDPI"/>
+      <ComponentRef Id="DeveloperToolsResource"/>
+      <ComponentRef Id="AngleLibEGL"/>
+      <ComponentRef Id="AngleLibEGLSV2"/>
+      <ComponentRef Id="CefD3DCompiler47"/>
+      <ComponentRef Id="WideVineContentDecryptionModuleAdapter"/>
+      <ComponentRef Id="EnglishUSLanguagePak"/>
+    </ComponentGroup>
+
+    <ComponentGroup Id="CefSharpCommonPackage">
+      <ComponentRef Id="CefSharpCoreLib"/>
+      <ComponentRef Id="CefSharpLib"/>
+      <ComponentRef Id="BrowserSubprocessCore"/>
+      <ComponentRef Id="BrowserSubprocessExecutable"/>
+    </ComponentGroup>
+
+    <ComponentGroup Id="MSVCRedistributablePackage">
+      <ComponentRef Id="MSCPRuntimeLibraryV120"/>
+      <ComponentRef Id="MSCRRuntimeLibraryV120"/>
+      <ComponentRef Id="MSVCWinRTCoreLibraryV120"/>
+    </ComponentGroup>
+    
+    <!-- Associate components with feature -->
+    <Feature Id="Complete" Title="stormwatercalculator1.2.0" Level="1">
+      <ComponentGroupRef Id ="StormwaterCalculator"/>
+      <ComponentGroupRef Id="CefRedistPackage"/>
+      <ComponentGroupRef Id="CefSharpCommonPackage"/>
+      <ComponentRef Id="CefSharpWinformsControls"/>
+      <ComponentRef Id="NewtonSoftJson"/>
+      <ComponentRef Id="StandardOLE"/>
+      <ComponentGroupRef Id="MSVCRedistributablePackage"/>
+    </Feature>
+
+    <!-- TODO: Improve installer to accomodate perMachine or perUser installation.
+          Combining them in a single package is referred to as "single 
+          package authoring."  wix_advanced UI has a dialog for InstallScope 
+          selection; however, the advanced installer UI contains other options 
+          that aren't needed for the minimal SWC install. Punting ... -->
+
+    <!-- UI>
+      <Property Id="ApplicationFolderName" Value="Stormwater Calculator" />
+      <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+      <UIRef Id="WixUI_Minimal" / -->
+    <!-- Skip license dialog -->
+    <!--Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallScopeDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallScopeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+    </UI -->
+
+  </Product>
+
+</Wix>

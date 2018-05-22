@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+    <script type="text/javascript">
+
+      var map = null;
+      var rainIcons = [];
+      rainIcons[0] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=1&color=00FFFF';
+      rainIcons[1] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=2&color=00FFFF';
+      rainIcons[2] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=3&color=00FFFF';
+      rainIcons[3] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=4&color=00FFFF';
+      rainIcons[4] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=5&color=00FFFF';
+  
+      var evapIcons = [];
+      evapIcons[0] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=1&color=00FF00';
+      evapIcons[1] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=2&color=00FF00';
+      evapIcons[2] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=3&color=00FF00';
+      evapIcons[3] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=4&color=00FF00';
+      evapIcons[4] = 'http://thydzik.com/thydzikGoogleMap/markerlink.php?text=5&color=00FF00';
+  
+      var siteMarker;
+      var siteIcon = "http://maps.google.com/mapfiles/kml/pal4/icon48.png";
+      var locatorStatus = "OFF";
+      var addressToFind = "";
+      var siteRadius = 0;
+      var siteLoc = null;
+      var siteBoundary;
+      var soilPolygons;
+      var soilColors = [];
+      var groupColors = [];
+      var ksatColors = [];
+      var slopeColors = [];
+      var rainMarkers;
+      var evapMarkers;
+      var coords = [];
+      var opacity = 96;   //128;
+      var mapBounds;
+      var geoLocationProvider;
+  
+      function initialize() {
+        var e;
+        try {
+          map = new Microsoft.Maps.Map(document.getElementById("mapDiv"), 
+            {credentials: "AtXf0NEkuq-T5zXeVlMKzovSSbocauFxPTn4nidfB8qPYapU9DWadnujFpnuWfuw",
+             center: new Microsoft.Maps.Location(40, -98.5),
+             mapTypeId: Microsoft.Maps.MapTypeId.road,
+             zoom: 3});
+        } catch (e) {
+            document.writeln("  Bing Maps is not available.");
+            return;
+        }
+        window.external.SetSiteLocation("40,-98.5");
+        siteLoc = new Microsoft.Maps.Location(40, -98.5);
+        var center = map.getCenter();
+        var offset = new Microsoft.Maps.Point(15, 15);
+        siteMarker = new Microsoft.Maps.Pushpin(center, {icon: siteIcon, anchor: offset}); 
+        map.entities.push(siteMarker);
+        rainMarkers = new Microsoft.Maps.EntityCollection();
+        map.entities.push(rainMarkers);
+        evapMarkers = new Microsoft.Maps.EntityCollection();
+        map.entities.push(evapMarkers);
+        soilPolygons = new Microsoft.Maps.EntityCollection();
+        map.entities.push(soilPolygons);
+        siteBoundary = new Microsoft.Maps.Polyline(null);
+        map.entities.push(siteBoundary);
+        Microsoft.Maps.Events.addHandler(map, 'click', placeSiteMarker);
+
+		// Set fill color and opacity of soil polygons
+		soilColors["A"] = new Microsoft.Maps.Color(opacity, 0, 255, 255);
+		soilColors["B"] = new Microsoft.Maps.Color(opacity, 0, 255, 0);
+		soilColors["C"] = new Microsoft.Maps.Color(opacity, 255, 255, 0);
+		soilColors["D"] = new Microsoft.Maps.Color(opacity, 255, 0, 255);
+
+		// Changes Bing Maps mouse cursor to an arrow (Doesn't work too well)
+		//Microsoft.Maps.Events.addHandler(map, "mousemove", function (e) {
+        //  if (e.targetType == "map") {
+     	//	document.getElementById("mapDiv").childNodes[0].style.cursor = "default";
+		//  }
+		//});
+
+     }
+
+      function placeSiteMarker(e) {
+        if (e.targetType == "map" && locatorStatus == "ON") {
+          var point = new Microsoft.Maps.Point(e.getX(), e.getY());
+          siteLoc = e.target.tryPixelToLocation(point);
+          if (siteLoc != null) {
+            siteMarker.setLocation(siteLoc);
+            map.setView({ center: siteLoc });
+            if (siteRadius > 0) drawSiteBoundary();
+            window.external.SetSiteLocation(siteLoc.latitude + "," + siteLoc.longitude);
+          }
+        }
+      }
+
+      function zoomToLocation(lat, lng) {
+        siteLoc = new Microsoft.Maps.Location(lat, lng);
+        siteMarker.setLocation(siteLoc);
+        map.setView({center:siteLoc, zoom: 12});
+      }
+  
+      function setLocatorStatus(status) {
+        locatorStatus = status;
+      }
+
+      function setSiteRadius(r) {
+          siteRadius = r;
+          drawSiteBoundary();
+      }
+
+      function drawSiteBoundary()
+      {
+        var earthRadius = 6371;
+      
+        //latitude in radians
+        var lat = (siteLoc.latitude * Math.PI) / 180; 
+        
+        //longitude in radians
+        var lon = (siteLoc.longitude * Math.PI) / 180; 
+
+        //angular distance covered on earth's surface
+        var d = siteRadius / earthRadius; 
+        
+        var points = new Array();
+        for (var x = 0; x <= 360; x++) 
+        {
+            var p2 = new Microsoft.Maps.Location(0, 0);
+            brng = x * Math.PI / 180; //rad
+            p2.latitude = Math.asin(Math.sin(lat) * Math.cos(d) + Math.cos(lat) * Math.sin(d) * Math.cos(brng));
+            p2.longitude = ((lon + Math.atan2(Math.sin(brng) * Math.sin(d) * Math.cos(lat), 
+                           Math.cos(d) - Math.sin(lat) * Math.sin(p2.latitude))) * 180) / Math.PI;
+            p2.latitude = (p2.latitude * 180) / Math.PI;
+            points.push(p2);
+        }
+        siteBoundary.setLocations(points);
+      } 
+
+      function saveMapBounds() {
+          mapBounds = map.getBounds();
+      }
+
+      function restoreMapBounds() {
+        if (mapBounds != null) {
+          map.setView({bounds: mapBounds});
+          mapBounds = null;
+        }
+      }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+  
+      function locateAddress(address) {
+        addressToFind = address;
+        map.getCredentials(MakeGeocodeRequest);
+      }
+
+      function MakeGeocodeRequest(credentials) {
+        var geocodeRequest = "http://dev.virtualearth.net/REST/v1/Locations/" +
+          addressToFind + "?output=json&jsonp=GeocodeCallback&key=" + credentials;
+        CallRestService(geocodeRequest);
+      }
+
+      function GeocodeCallback(result) {
+        if (result &&
+          result.resourceSets &&
+          result.resourceSets.length > 0 &&
+          result.resourceSets[0].resources &&
+          result.resourceSets[0].resources.length > 0) {
+
+          // Set the map view using the returned bounding box
+          var bbox = result.resourceSets[0].resources[0].bbox;
+          var viewBoundaries = Microsoft.Maps.LocationRect.fromLocations(new Microsoft.Maps.Location(bbox[0],
+            bbox[1]), new Microsoft.Maps.Location(bbox[2], bbox[3]));
+          map.setView({ bounds: viewBoundaries});
+
+          // Move site marker to the found location
+          siteLoc = new Microsoft.Maps.Location(result.resourceSets[0].resources[0].point.coordinates[0],
+            result.resourceSets[0].resources[0].point.coordinates[1]);
+          siteMarker.setLocation(siteLoc);
+		  if (siteRadius > 0) drawSiteBoundary();
+          window.external.SetSiteLocation(siteLoc.latitude + "," + siteLoc.longitude);
+        }
+      }
+
+      function CallRestService(request) {
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("src", request);
+        document.body.appendChild(script);
+      }
+
+    /////////////////////////////////////////////////////////////////////////////////////
+  
+      function addCoords(lat, lng) {
+        coords.push(new Microsoft.Maps.Location(lat, lng));
+      }
+  
+      function addSoilPolygon(soilGroup, kSat, slope) {
+          
+        // Transfer coordinates from global coords array to local vertices array
+        var vertices = [];
+        for (var i = 0; i < coords.length; i++) {
+          vertices[i] = coords[i];
+        }
+
+        // Create a color for the soil group
+        var polygonColor = soilColors[soilGroup];
+        groupColors.push(polygonColor);
+
+        // Create a new polygon with the soil group color
+        var polygon = new Microsoft.Maps.Polygon(vertices, {fillColor: polygonColor,
+          strokeColor: "#000000", strokeThickness: 1});
+        soilPolygons.push(polygon);
+
+        // Create a color for the kSat level
+        var ksatColor = soilColors[kSat];
+        ksatColors.push(ksatColor);
+
+        // Create a color for the slope level
+        var slopeColor = soilColors[slope];
+        slopeColors.push(slopeColor);
+
+        // Add an OnClick handler for the polygon
+        Microsoft.Maps.Events.addHandler(polygon, 'click', selectPolygon);
+        coords.length = 0;
+      }
+  
+      function selectPolygon(e) {
+        if (e.targetType == "polygon") {
+          window.external.SetSelectedPolygon(soilPolygons.indexOf(e.target));
+        }
+      }
+  
+      function showSoilGroupPolygons() {
+        for (var i = 0; i < soilPolygons.getLength(); i++) {
+          var polygon = soilPolygons.get(i);
+          polygon.setOptions({fillColor: groupColors[i]});
+        }
+        soilPolygons.setOptions({visible: true});
+      }
+  
+      function showKsatPolygons() {
+        for (var i = 0; i < soilPolygons.getLength(); i++) {
+          var polygon = soilPolygons.get(i);
+          polygon.setOptions({fillColor: ksatColors[i]});
+        }
+        soilPolygons.setOptions({visible: true});
+      }
+
+      function showSlopePolygons() {
+        for (var i = 0; i < soilPolygons.getLength(); i++) {
+          var polygon = soilPolygons.get(i);
+          polygon.setOptions({fillColor: slopeColors[i]});
+        }
+        soilPolygons.setOptions({visible: true});
+      }
+  
+      function hideSoilPolygons() {
+        soilPolygons.setOptions({visible: false});
+      }
+  
+      function addRainMarker(lat, lng) {
+        var index = rainMarkers.getLength();
+        var loc = new Microsoft.Maps.Location(lat, lng);
+        var marker = new Microsoft.Maps.Pushpin(loc, {icon: rainIcons[index]});
+        rainMarkers.push(marker);
+        rainMarkers.setOptions({visible: false});
+      }
+  
+      function showRainMarkers() {
+          var locs = [];
+          locs.push(siteMarker.getLocation());
+          for (var i = 0; i < rainMarkers.getLength(); i++) {
+            locs.push(rainMarkers.get(i).getLocation());
+          }
+          var viewBoundaries = Microsoft.Maps.LocationRect.fromLocations(locs);
+          map.setView({ bounds: viewBoundaries});
+          rainMarkers.setOptions({visible: true});
+      }
+  
+      function hideRainMarkers() {
+        rainMarkers.setOptions({visible: false});
+      }
+        
+      function addEvapMarker(lat, lng) {
+        var index = evapMarkers.getLength();
+        var loc = new Microsoft.Maps.Location(lat, lng);
+        var marker = new Microsoft.Maps.Pushpin(loc, {icon: evapIcons[index]});
+        evapMarkers.push(marker);
+        evapMarkers.setOptions({visible: false});
+      }
+  
+      function showEvapMarkers() {
+          var locs = [];
+          locs.push(siteMarker.getLocation());
+          for (var i = 0; i < evapMarkers.getLength(); i++) {
+            locs.push(evapMarkers.get(i).getLocation());
+          }
+          var viewBoundaries = Microsoft.Maps.LocationRect.fromLocations(locs);
+          map.setView({ bounds: viewBoundaries});
+          evapMarkers.setOptions({visible: true});
+      }
+  
+      function hideEvapMarkers() {
+        evapMarkers.setOptions({visible: false});
+      }
+
+      function restoreEvapView() {
+        if (evapMapBounds != null) {
+          map.setView({bounds: evapMapBounds});
+          evapMapBounds = null;
+        }
+      }
+  
+      function deleteOverlays() {
+        if (rainMarkers) rainMarkers.clear();
+        if (evapMarkers) evapMarkers.clear();
+        if (soilPolygons) soilPolygons.clear();
+        groupColors = [];
+        ksatColors = [];
+        slopeColors = [];
+      }
+
+    </script>
+  </head>
+  <body onload="initialize();">
+    <div id="mapDiv" style="position:absolute; width:95%; height:95%;"></div>
+  </body>
+</html>

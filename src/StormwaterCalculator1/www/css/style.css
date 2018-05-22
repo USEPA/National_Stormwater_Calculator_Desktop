@@ -1,0 +1,92 @@
+
+body {
+    font-size: 12px;
+}
+.col{
+   padding:0 5px 0 5px;
+}
+.gs-bold {
+    font-weight: bold;
+}
+
+/*.gs-tbl-odd .col{
+    background:rgba(0,0,0,0.1);
+
+}
+.gs-tbl-even .col{
+    background:rgba(255,255,0,0.1);
+}*/
+.chart {
+    min-width: 250px;
+    min-height: 250px;
+}
+.svg-container{
+    margin:auto !important;
+}
+.gs-chart-title{
+    margin-bottom: 0;
+}
+
+.gs-scenario-tbl{
+    margin:auto;
+}
+.gs-scenario-tbl div.col {
+    border: 1px solid #cfcfcf;
+    background: rgba(255,255,255,0.1);
+}
+
+.gs-current-scenario-tbl div.col {
+    /*border: 1px solid #cfcfcf;*/
+    background: #fff;
+}
+
+.gs-base-scenario-cont div.col {
+    /*border: 1px solid #cfcfcf;*/
+    background: #e4e5e7;
+}
+
+.gs-complexity-label{
+    padding:0px;
+}
+
+div.col.gs-base-scenario-cont {
+    /*border:1px solid #cfcfcf;*/
+    background: #e4e5e7;
+}
+
+div.col.gs-current-scenario-cont {
+    /*border:1px solid #cfcfcf;*/
+    background: #e9f0f2;
+}
+
+.gs-diff-scenario-cont div.col, div.col.gs-diff-scenario-cont {
+    /*border:1px solid #cfcfcf;*/
+    background: #d9e0e2;
+}
+
+div.col.gs-graph-cont {
+    min-width: 250px;
+    max-width: 50%;
+    margin: auto;
+}
+
+.gs-tbl-header {
+    font-weight: bold;
+    /*font-size: 12px;*/
+}
+
+.gs-tbl-noborder, .gs-tbl-noborder div.row {
+    margin: 0;
+    padding: 0;
+}
+
+.gs-tbl-noborder div.col {
+    border: 0px;
+}
+
+.gs-chartkey-cont, .gs-complexitykey-cont{
+    border:#ddd 1px solid;
+    padding:0;
+    margin:0;
+    background:#eee;
+}

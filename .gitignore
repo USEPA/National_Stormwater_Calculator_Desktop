@@ -1,0 +1,14 @@
+# Visual Studio
+
+# User-specific files
+*.suo
+*.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Other
+*Copy of*
