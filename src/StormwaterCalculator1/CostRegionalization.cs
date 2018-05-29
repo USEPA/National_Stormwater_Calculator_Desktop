@@ -329,8 +329,14 @@ namespace StormwaterCalculator
 
             BlsCity.inflationFactor = Math.Round(BlsCity.regionalFactor / BlsCity.regModel2014Index, dcp);
             BlsCity.regionalFactor = Math.Round(BlsCity.regionalFactor / default2015NationalIndex, dcp);
-            BlsCity.selectString = String.Format("{0} ({1:F0} miles) {2}", BlsCity.blsCity, BlsCity.distToCurrentPoint, BlsCity.regionalFactor);
-
+            if (BlsCity.blsCity == "NATIONAL")
+            {
+                BlsCity.selectString = String.Format("{0} ({1}) {2}", BlsCity.blsCity, "NA", BlsCity.regionalFactor);
+            }
+            else
+            {
+                BlsCity.selectString = String.Format("{0} ({1:F0} miles) {2}", BlsCity.blsCity, BlsCity.distToCurrentPoint, BlsCity.regionalFactor);
+            }
         }
 
         //retrieves data via the BLS api given a valid BLS regional center, a series id and start/end year
