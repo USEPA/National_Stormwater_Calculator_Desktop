@@ -31,7 +31,7 @@ namespace StormwaterCalculator
     public class CostRegionalization
     {
         //default National index computed for 2015 used as the basis for normalizing regional indexes
-        private double default2015NationalIndex = 201.22;
+        //private double default2015NationalIndex = 201.22;
         //user is given the option to select the nearest 3 bls regions
         private int shortListCount = 3;
         private int dcp = 2; //default number of decimal places to round 2
@@ -214,6 +214,15 @@ namespace StormwaterCalculator
                 dataYear = dataYear - 1;
             }
 
+            // do the National series first to get the dynamicNationalIndex
+            BlsCenter National = BlsCenters[3];
+            List<string> nationalIDs = new List<string>();
+            nationalIDs.Add(National.blsReadyMixConcID);
+            nationalIDs.Add(National.blsTractorShovelLoadersID);
+            nationalIDs.Add(National.blsEnergyID);
+            nationalIDs.Add(National.blsFuelsUtilitiesID);
+            status = status && getBLSData(National, nationalIDs.ToArray(), dataYear.ToString(), dataYear.ToString(), National.regionalFactor);
+
             foreach (BlsCenter BlsCity in BlsCenters)
             {
                 count += 1;
@@ -224,7 +233,7 @@ namespace StormwaterCalculator
                 seriesIDs.Add(BlsCity.blsTractorShovelLoadersID);
                 seriesIDs.Add(BlsCity.blsEnergyID);
                 seriesIDs.Add(BlsCity.blsFuelsUtilitiesID);
-                status = status && getBLSData(BlsCity, seriesIDs.ToArray(), dataYear.ToString(), dataYear.ToString());
+                status = status && getBLSData(BlsCity, seriesIDs.ToArray(), dataYear.ToString(), dataYear.ToString(), BlsCenters[3].regionalFactor);
                 Console.WriteLine("Element #{0}: {1} {2} {3} {4} {5}", count, BlsCity.blsCity, BlsCity.blsReadyMixConcID, BlsCity.blsTractorShovelLoadersID, BlsCity.blsEnergyID, BlsCity.blsFuelsUtilitiesID);
             }
             return status;
@@ -290,7 +299,7 @@ namespace StormwaterCalculator
 
         //supervises computation of regional multipliers for a BLS regional center based on a regression
         //equation previously determined by an external model
-        public void computeAndSaveRegMult(BlsCenter BlsCity, List<Series> blsSeriesArr)
+        public void computeAndSaveRegMult(BlsCenter BlsCity, List<Series> blsSeriesArr, double dynamicNationalIndex)
         {
             string[] validSeriesIDs = { "blsReadyMixConcID", "blsTractorShovelLoadersID", "blsEnergyID", "blsFuelsUtilitiesID" };
             // var seriesLabelIDFrags = new List<string> { "PCU327320327320","PCU33312033312014","SA0E","SAH2" };
@@ -328,7 +337,7 @@ namespace StormwaterCalculator
             (BlsCity.c4_fuelUtils * blsVarDict[validSeriesIDs[3]]);
 
             BlsCity.inflationFactor = Math.Round(BlsCity.regionalFactor / BlsCity.regModel2014Index, dcp);
-            BlsCity.regionalFactor = Math.Round(BlsCity.regionalFactor / default2015NationalIndex, dcp);
+            BlsCity.regionalFactor = Math.Round(BlsCity.regionalFactor / dynamicNationalIndex, dcp);
             if (BlsCity.blsCity == "NATIONAL")
             {
                 BlsCity.selectString = String.Format("{0} ({1}) {2}", BlsCity.blsCity, "NA", BlsCity.regionalFactor);
@@ -340,7 +349,7 @@ namespace StormwaterCalculator
         }
 
         //retrieves data via the BLS api given a valid BLS regional center, a series id and start/end year
-        public bool getBLSData(BlsCenter BlsCity, string[] seriesIDs, string startyear, string endyear)
+        public bool getBLSData(BlsCenter BlsCity, string[] seriesIDs, string startyear, string endyear, double dynamicNationalIndex)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create("https://api.bls.gov/publicAPI/v2/timeseries/data/");
             httpWebRequest.ContentType = "application/json";
@@ -375,7 +384,7 @@ namespace StormwaterCalculator
                 //check to see if success response received
                 if (obj.ToString() == "Status: REQUEST_SUCCEEDED")
                 {
-                    computeAndSaveRegMult(BlsCity, obj.Results.series);
+                    computeAndSaveRegMult(BlsCity, obj.Results.series, dynamicNationalIndex);
 
                 }
                 //Console.ReadLine();
