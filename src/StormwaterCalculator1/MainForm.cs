@@ -649,6 +649,7 @@ namespace StormwaterCalculator
             nudDesignStorm.Value = 0;
 
             // Analysis controls
+            nudYearsAnalyzed.Maximum = Decimal.MaxValue;
             nudYearsAnalyzed.Value = 20;
 
             nudEventThreshold.Value = 0.10M;
