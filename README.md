@@ -7,7 +7,7 @@ The SWC accesses several national databases that provide soil, topography, rainf
 The SWC can be downloaded at the offical [website](https://www.epa.gov/water-research/national-stormwater-calculator).
 
 # License
-(??)
+The source code for the SWC desktop is released in the public domain.
 
 # Contact
 swc@epa.gov
