@@ -69,7 +69,7 @@ namespace StormwaterCalculator
         public static extern int swmm_run(string f1, string f2, string f3);
 
         // Release Number
-        public string releaseVersion = "Release 1.2.0.0";
+        public string releaseVersion = "Release 1.2.0.1";
 
         // Actions carried out by a background worker thread
         public enum Actions { GET_SOIL_DATA, GET_RAINFALL, RUN_SWMM, CALC_STATS };
@@ -650,6 +650,7 @@ namespace StormwaterCalculator
 
             // Analysis controls
             nudYearsAnalyzed.Value = 20;
+
             nudEventThreshold.Value = 0.10M;
             cbIgnoreConsecDays.Checked = false;
             mnuRefreshResults.Enabled = true;
@@ -727,7 +728,7 @@ namespace StormwaterCalculator
         {
             //if coordinates have not changed do not re-aquire data for efficiency reasons
             if (SelectedIndex == -1 && BrowserCommunicator.lat == lat && BrowserCommunicator.lng == lng) return;
-            
+
             statusLabel.Text = "Retrieving regional cost data...";
 
             BrowserCommunicator.lat = lat;
