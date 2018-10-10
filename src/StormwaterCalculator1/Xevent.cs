@@ -141,7 +141,7 @@ namespace StormwaterCalculator
                 switch (scsType)
                 {
                     case "I": FillRainTimeSeries(rainfall[i], scsI, ref rSeries); break;
-                    case "Ia": FillRainTimeSeries(rainfall[i], scsIa, ref rSeries); break;
+                    case "IA": FillRainTimeSeries(rainfall[i], scsIa, ref rSeries); break;
                     case "II": FillRainTimeSeries(rainfall[i], scsII, ref rSeries); break;
                     case "III": FillRainTimeSeries(rainfall[i], scsIII, ref rSeries); break;
                 }
