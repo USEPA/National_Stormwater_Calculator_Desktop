@@ -273,9 +273,9 @@ namespace StormwaterCalculator
         enum FieldNumbers
         {
             musym = 6,
-            hydgrpdcd = 9,
-            slope_r = 10,
-            comppct_r = 11,
+            hydgrpdcd = 12,
+            slope_r = 11,
+            comppct_r = 10,
             hzdept_r = 13,
             hzdepb_r = 14,
             ksat_r = 15,
@@ -295,17 +295,16 @@ namespace StormwaterCalculator
                            "saversion, saverest," + CR +
                            "l.areasymbol, l.areaname, l.lkey," + CR +
                            "mu.musym, mu.muname, museq, mu.mukey," + CR +
-                           "hydgrpdcd" + CR +
-                           "compname, slope_r, comppct_r, c.cokey, " + CR +
+                           "compname, comppct_r, slope_r, hydgrpdcd, " + CR +
                            "hzdept_r, hzdepb_r, ksat_r, ch.chkey " + CR +
-                           "FROM sacatalog sac" + CR +
-                           "INNER JOIN legend l ON l.areasymbol = sac.areasymbol" + CR +
-                           "AND l.areasymbol = " + "'" + aArea + "'" + CR +
+                           "FROM legend l" + CR +
                            "INNER JOIN mapunit mu ON mu.lkey = l.lkey" + CR +
-                           "AND mu.mukey = " + "'" + aKey + "'" + CR +
-                           "LEFT OUTER JOIN muaggatt m ON m.mukey = mu.mukey" + CR +
+                           "AND mu.mukey = " + aKey + CR +
+                           "INNER JOIN sacatalog sac ON l.areasymbol = sac.areasymbol" + CR +
+                           "INNER JOIN muaggatt m ON m.mukey = mu.mukey" + CR +
                            "LEFT OUTER JOIN component c ON c.mukey = mu.mukey" + CR +
-                           "LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey" + CR;
+                           "LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey" + CR +
+                           "ORDER BY comppct_r DESC, c.cokey, hzdept_r ASC" + CR;
 
             // Here we use a Service Reference to run the SQL query against the SSURGO
             // database. See http://msdn.microsoft.com/en-us/library/bb628652.aspx for
