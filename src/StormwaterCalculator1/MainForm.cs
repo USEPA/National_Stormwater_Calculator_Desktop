@@ -69,7 +69,7 @@ namespace StormwaterCalculator
         public static extern int swmm_run(string f1, string f2, string f3);
 
         // Release Number
-        public string releaseVersion = "Release 1.2.0.1";
+        public string releaseVersion = "Release 1.2.0.2";
 
         // Actions carried out by a background worker thread
         public enum Actions { GET_SOIL_DATA, GET_RAINFALL, RUN_SWMM, CALC_STATS };
@@ -649,6 +649,7 @@ namespace StormwaterCalculator
             nudDesignStorm.Value = 0;
 
             // Analysis controls
+            nudYearsAnalyzed.Maximum = Decimal.MaxValue;
             nudYearsAnalyzed.Value = 20;
 
             nudEventThreshold.Value = 0.10M;
