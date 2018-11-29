@@ -15,7 +15,7 @@ angular.module('nscwebappApp')
                 isReDevelopment: { simple: 0, typical: 1, complex: 1 },
                 hasPretreatment: { simple: 0, typical: 1, complex: 1 },
                 siteSuitability: [{ simple: 0, typical: 0, complex: 1 }, { simple: 0, typical: 1, complex: 0 }, { simple: 1, typical: 0, complex: 0 }],
-                topography: [{ simple: 1, typical: 0, complex: 0 }, { simple: 1, typical: 1, complex: 0 }, { simple: 0, typical: 1, complex: 0 }, { simple: 0, typical: 0, complex: 1 }],
+                topography: [{ simple: 1, typical: 0, complex: 0 }, { simple: 1, typical: 1, complex: 0 }, { simple: 0, typical: 1, complex: 1 }, { simple: 0, typical: 0, complex: 1 }],
                 soilType: [{ simple: 1, typical: 0, complex: 0 }, { simple: 0, typical: 1, complex: 0 }, { simple: 0, typical: 0, complex: 1 }, { simple: 0, typical: 0, complex: 1 }]
             };
 

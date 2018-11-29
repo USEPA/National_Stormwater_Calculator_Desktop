@@ -438,8 +438,8 @@ namespace StormwaterCalculator
             pdfPage myPage = myDoc.addPage(predefinedPageSize.csSharpPDFFormat);
             int width = myPage.width - leftMargin - rightMargin;
             WritePageTitle(myPage, "Estimate of Probable Costs", siteName);
-            WriteCapitalCostSummaryTable(myPage, "Capital Costs", 4, costModuleResults);
-            WriteMaintCostSummaryTable(myPage, "Maintenance Costs", 17, costModuleResults);
+            WriteCapitalCostSummaryTable(myPage, "Capital Costs", 6, costModuleResults);
+            WriteMaintCostSummaryTable(myPage, "Maintenance Costs", 19, costModuleResults);
             WriteFooter(myPage);
         }
 

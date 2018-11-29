@@ -113,7 +113,8 @@ namespace StormwaterCalculator
             // Check that % of impervious area treated is <= 100
             if (SiteData.fracImpDiscon + SiteData.fracRainHarvest +
                 SiteData.fracRainGarden + SiteData.fracStreetPlanter +
-                SiteData.fracInfilBasin + SiteData.fracPorousPave > 1.01)
+                SiteData.fracInfilBasin + SiteData.fracPorousPave +
+                SiteData.fracGreenRoof > 1.01)
             {
                 MessageBox.Show(
                     "The amount of impervious area assigned for treatment by\n" +
