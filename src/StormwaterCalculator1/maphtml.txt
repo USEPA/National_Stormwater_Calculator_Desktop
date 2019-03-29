@@ -247,7 +247,7 @@
   
       function selectPolygon(e) {
         if (e.targetType == "polygon") {
-          window.external.SetSelectedPolygon(soilPolygons.indexOf(e.target));
+          window.external.SetSelectedPolygon(soilPolygons.getPrimitives().indexOf(e.target));
         }
       }
   
