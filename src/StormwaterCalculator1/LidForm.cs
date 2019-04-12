@@ -346,7 +346,7 @@ namespace StormwaterCalculator
         private void lnkLblPorPave_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/swc/NonPBMPSpecsMarch11/VASWMBMPSpec7PERMEABLEPAVEMENT.html");
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_7_PERMEABLE_PAVEMENT.pdf");
         }
 
         private void lnkLblInfilBasin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -358,31 +358,31 @@ namespace StormwaterCalculator
         private void lnkLblPlanter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/swc/NonPBMPSpecsMarch11/VASWMBMPSpec9BIORETENTION.html");
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_9_BIORETENTION.pdf");
         }
 
         private void lnkLblDisconnect_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/swc/NonPBMPSpecsMarch11/VASWMBMPSpec1DISCONNECTION.html");
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_1_DISCONNECTION.pdf");
         }
 
         private void lnlLblRainGarden_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/swc/NonPBMPSpecsMarch11/VASWMBMPSpec9BIORETENTION.html");
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_9_BIORETENTION.pdf");
         }
 
         private void lnkLblRainHarvest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://vwrrc.vt.edu/swc/NonPBMPSpecsMarch11/VASWMBMPSpec6RAINWATERHARVESTING.html");
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_6_RAINWATER_HARVESTING.pdf");
         }
 
         private void lnkLblGreenRoof_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(
-                "http://www.vwrrc.vt.edu/swc/documents/2013/DEQ%20BMP%20Spec%20No%205_VEGETATED%20ROOF_Final%20Draft_v2-3_03012011.pdf"); //1.1.0.1
+                "https://www.swbmp.vwrrc.vt.edu/wp-content/uploads/BMP_Spec_No_5_VEGETATED_ROOF.pdf"); //1.1.0.1
         }
 
         private void lblCostHasPreTreat_Click(object sender, EventArgs e)
