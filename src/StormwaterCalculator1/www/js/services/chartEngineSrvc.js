@@ -189,7 +189,7 @@ angular.module('nscwebappApp')
                     },
                     yaxis: {
                         fixedrange: true, //disables zoom
-                        title: '2015 USD',
+                        title: 'USD',
                         titlefont: {
                             size: 10,
                             color: 'rgb(107, 107, 107)'
