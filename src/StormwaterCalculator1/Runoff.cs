@@ -655,7 +655,7 @@ namespace StormwaterCalculator
                         runoff += GetValueFromLine(sr.ReadLine()) * factor;
                     }
 
-                    if (line.Contains("  Seepage Loss"))
+                    if (line.Contains("  Exfiltration Loss"))
                     {
                         infil += GetValueFromLine(line) * factor;
                         break;
