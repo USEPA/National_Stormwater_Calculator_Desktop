@@ -206,8 +206,11 @@
     <None Include="Service References\ServiceReference1\SDMTabularService1.wsdl" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ZedGraph.dll" />
     <None Include="Service References\ServiceReference1\SDMTabularService1.disco" />
     <Content Include="bin\Release\epa3.ico" />
+    <Content Include="SharpPDF.dll" />
+    <Content Include="SWC_D4EMLite.dll" />
     <Content Include="www\css\ionic-mit.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -245,7 +248,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="bin\Release\jeapordy.wav" />
-    <Content Include="epa3.ico" />
+    <Content Include="epa3.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Service References\ServiceReference1\configuration91.svcinfo" />
     <None Include="Service References\ServiceReference1\configuration.svcinfo" />
     <None Include="Service References\ServiceReference1\Reference.svcmap">
