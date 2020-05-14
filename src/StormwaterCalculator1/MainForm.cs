@@ -69,7 +69,7 @@ namespace StormwaterCalculator
         public static extern int swmm_run(string f1, string f2, string f3);
 
         // Release Number
-        public string releaseVersion = "Release 1.2.0.3";
+        public string releaseVersion = "Release 2.0.0.1";
 
         // Actions carried out by a background worker thread
         public enum Actions { GET_SOIL_DATA, GET_RAINFALL, RUN_SWMM, CALC_STATS };
